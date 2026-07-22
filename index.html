@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --card-bg: #ffffff;
+            --text-main: #111111;
+            --text-muted: #666666;
+            --border-color: #e5e5e5;
+            --btn-primary: #18181b;
+            --btn-primary-hover: #27272a;
+            --btn-secondary: #f4f4f5;
+            --btn-secondary-hover: #e4e4e7;
+            --btn-danger: #18181b;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 頂部導航列 */
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 18px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin: 0;
+        }
+
+        #nav-actions {
+            font-size: 0.9rem;
+        }
+
+        #user-display {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        /* 通用按鈕 */
+        .btn {
+            background: var(--btn-primary);
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn:hover {
+            background: var(--btn-primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--btn-secondary);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--btn-secondary-hover);
+        }
+
+        .btn-danger {
+            background: #ffffff;
+            color: #dc2626;
+            border: 1px solid #fee2e2;
+        }
+        
+        .btn-danger:hover {
+            background: #fef2f2;
+        }
+
+        /* 主容器與頁面控制 */
+        .page {
+            display: none;
+            width: 100%;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        /* --- 登入頁獨有雙欄 layout --- */
+        .auth-wrapper {
+            display: flex;
+            min-height: calc(100vh - 61px);
+            width: 100%;
+        }
+
+        .auth-left {
+            flex: 1;
+            padding: 60px 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #ffffff;
+            background-image: radial-gradient(#e5e5e5 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .auth-right {
+            flex: 1.1;
+            background: #09090b;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        .auth-right-img-full {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* 切換頁籤 (Tab) */
+        .tab-btn-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: #f4f4f5;
+            padding: 4px;
+            border-radius: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active-tab {
+            background: #ffffff;
+            color: var(--text-main);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* 表單元素 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+            background: #ffffff;
+        }
+
+        .form-group input:focus {
+            border-color: var(--text-main);
+        }
+
+        /* 忘記密碼提示 */
+        .forget-pwd-notice {
+            margin-top: 15px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        /* 管理員登入區 */
+        .admin-box {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .admin-box h4 {
+            margin: 0 0 15px 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* 商品與清單卡片 */
+        .product-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .product-img {
+            width: 80px;
+            height: 80px;
+            background: #f4f4f5;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .bank-info {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* 表格樣式 */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #f8f8f8;
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* 搜尋列 */
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #ffffff;
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            outline: none;
+        }
+
+        /* 彈窗 Modal 樣式 */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 550px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 850px) {
+            .auth-wrapper { flex-direction: column; }
+            .auth-right { display: none; }
+            .auth-left { padding: 40px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2></h2>
+    <div id="nav-actions" style="display:none;">
+        <span id="user-display" style="margin-right: 15px;"></span>
+        <!-- 管理員專用按鈕 -->
+        <button class="btn btn-secondary" id="admin-stats-btn" onclick="showStatsPage()" style="display:none; margin-right: 8px;">訂購統計</button>
+        <button class="btn btn-secondary" id="admin-pass-btn" onclick="showPasswordManage()" style="display:none; margin-right: 8px;">各店密碼查詢</button>
+        <button class="btn btn-secondary" onclick="showHistory()" style="margin-right: 8px;">訂單紀錄</button>
+        <button class="btn btn-secondary" onclick="logout()">登出</button>
+    </div>
+</header>
+
+<!-- 第一頁：註冊與登入 -->
+<div id="page1" class="page active">
+    <div class="auth-wrapper">
+        <div class="auth-left">
+            <div style="margin-bottom: 30px;">
+                <h2 style="font-size: 1.5rem; font-weight: 600; margin: 0 0 8px 0; letter-spacing: -0.03em;">永慶四品牌中秋月餅訂購系統</h2>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">此系統僅供永慶四品來內部訂購月餅用</p>
+            </div>
+            
+            <div class="tab-btn-group">
+                <button type="button" id="tab-login-btn" class="tab-btn active-tab" onclick="switchAuthTab('login')">登入</button>
+                <button type="button" id="tab-register-btn" class="tab-btn" onclick="switchAuthTab('register')">註冊</button>
+            </div>
+
+            <!-- 1. 登入區塊 -->
+            <div id="login-section">
+                <div class="form-group">
+                    <label>店代號</label>
+                    <input type="text" id="login-store-id" placeholder="例如: DC000">
+                </div>
+                <div class="form-group">
+                    <label>密碼</label>
+                    <input type="password" id="login-password" placeholder="請輸入密碼">
+                </div>
+                <button class="btn" style="width: 100%; margin-top: 10px;" onclick="handleLogin()">登入系統</button>
+                
+                <div class="forget-pwd-notice">
+                    「忘記密碼」請洽「巧克力」LineID：83703544<br>
+                    上班時間：09:00-12:00 &nbsp; 13:30-18:00 &nbsp
+                </div>
+            </div>
+
+            <!-- 2. 註冊區塊 (需求 6：新增註冊人姓名與電話) -->
+            <div id="register-section" style="display: none;">
+                <div class="form-group">
+                    <label>店代號</label>
+                    <input type="text" id="reg-store-id" oninput="autoFillStoreName()" placeholder="例如: DC000">
+                </div>
+                <div class="form-group">
+                    <label>店名稱</label>
+                    <input type="text" id="reg-store-name" readonly placeholder="自動帶入店名稱" style="background:#f4f4f5; color:#71717a;">
+                </div>
+                <div class="form-group">
+                    <label>設定密碼</label>
+                    <input type="password" id="reg-password" placeholder="請設定登入密碼">
+                </div>
+                <div class="form-group">
+                    <label>註冊人姓名</label>
+                    <input type="text" id="reg-registrant-name" placeholder="請輸入註冊人姓名">
+                </div>
+                <div class="form-group">
+                    <label>註冊人電話</label>
+                    <input type="tel" id="reg-registrant-phone" placeholder="請輸入註冊人電話">
+                </div>
+                <button class="btn" style="width: 100%; margin-top: 10px;" onclick="handleRegister()">完成註冊並登入</button>
+            </div>
+
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border-color);">
+
+            <!-- 管理員專區 -->
+            <div class="admin-box">
+                <h4>🔒 管理員專屬登入區</h4>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <input type="text" id="admin-user" placeholder="帳號">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <input type="password" id="admin-pass" placeholder="密碼">
+                </div>
+                <button class="btn btn-secondary" style="width: 100%;" onclick="adminLogin()">管理員登入</button>
+            </div>
+        </div>
+
+        <!-- 需求 5：右側滿版圖片放置 -->
+        <div class="auth-right">
+            <img src="images/中秋系統海報.png" class="auth-right-img-full" alt="中秋系統海報">
+        </div>
+    </div>
+</div>
+
+<div class="main-container">
+
+    <!-- 第二頁：選購月餅 -->
+    <div id="page2" class="page">
+        <h3 style="font-weight: 600; margin-bottom: 20px;">選擇訂購月餅款式</h3>
+        <div id="product-list"></div>
+        <div style="position: sticky; bottom: 20px; background: #ffffff; padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.9rem;">總數量：<strong id="cart-qty" style="color: var(--text-main);">0</strong> 盒</span>
+                <span style="margin: 0 10px; color: var(--border-color);">|</span>
+                <span style="color: var(--text-muted); font-size: 0.9rem;">總金額：<strong style="color: var(--text-main); font-size: 1.1rem;">$<span id="cart-total">0</span></strong></span>
+            </div>
+            <button class="btn" onclick="goToCheckout()">下一步：填寫寄送資訊</button>
+        </div>
+    </div>
+
+    <!-- 第三頁：核對明細與填寫資料 -->
+    <div id="page3" class="page">
+        <h3 style="font-weight: 600; margin-bottom: 20px;">訂單明細核對與寄送資訊</h3>
+        <div id="checkout-summary"></div>
+
+        <div class="bank-info">
+            <strong>💳 廠商匯款資訊：</strong><br>
+            銀行：(822) 中國信託商業銀行<br>
+            帳號：1234-5678-9012-3456<br>
+            戶名：月餅預購專用戶
+        </div>
+
+        <h4 style="margin: 25px 0 15px 0; font-weight: 600;">請輸入寄送資料：</h4>
+        <div class="form-group">
+            <label>訂購人姓名</label>
+            <input type="text" id="buyer-name" required placeholder="請輸入姓名">
+        </div>
+        <div class="form-group">
+            <label>聯絡電話</label>
+            <input type="tel" id="buyer-phone" required placeholder="請輸入電話">
+        </div>
+        <div class="form-group">
+            <label>月餅寄送地址</label>
+            <input type="text" id="buyer-address" required placeholder="請輸入完整地址">
+        </div>
+
+        <button class="btn" style="width: 100%; margin-top: 10px;" onclick="submitOrder()">確認送出訂單</button>
+    </div>
+
+    <!-- 第四頁：訂購完成 -->
+    <div id="page4" class="page" style="text-align: center; padding: 40px 0;">
+        <h3 style="color: var(--text-main); font-size: 1.5rem; margin-bottom: 20px;">🎉 訂購完成！</h3>
+        <div id="order-success-info" style="background: #ffffff; border: 1px solid var(--border-color); padding: 25px; border-radius: 12px; text-align: left; max-width: 500px; margin: 0 auto 25px auto; line-height: 1.8;"></div>
+        <!-- 需求 4：重置購物與表單資訊 -->
+        <button class="btn" onclick="resetAndContinueShopping()">繼續訂購</button>
+    </div>
+
+    <!-- 歷史紀錄 / 管理員後台頁面 -->
+    <div id="page-history" class="page">
+        <h3 id="history-title" style="font-weight: 600; margin-bottom: 20px;">訂單紀錄</h3>
+        
+        <div id="admin-search-area" class="search-box" style="display: none;">
+            <input type="text" id="search-keyword" placeholder="請輸入店代號或訂單編號查詢 (例: DC000 或 ORD123456)" oninput="filterOrders()">
+            <button class="btn btn-secondary" onclick="clearSearch()">清除搜尋</button>
+        </div>
+
+        <div id="history-list"></div>
+        <button class="btn btn-secondary" id="back-to-shop-btn" onclick="showPage('page2')" style="margin-top: 15px;">返回商品頁</button>
+    </div>
+
+    <!-- 管理員專用：各店密碼查詢頁面 -->
+    <div id="page-passwords" class="page">
+        <h3 style="font-weight: 600; margin-bottom: 20px;">🔑 管理員後台 - 各店密碼查詢</h3>
+        <div class="search-box">
+            <input type="text" id="search-store-pwd" placeholder="請輸入店代號搜尋 (例: DC000)" oninput="renderPasswordList()">
+            <button class="btn btn-secondary" onclick="document.getElementById('search-store-pwd').value=''; renderPasswordList();">清除搜尋</button>
+        </div>
+        <div id="password-list"></div>
+    </div>
+
+    <!-- 需求 2：管理員專用 - 訂購統計頁面 -->
+    <div id="page-stats" class="page">
+        <h3 style="font-weight: 600; margin-bottom: 20px;">📊 管理員後台 - 全系統訂購統計</h3>
+        <div id="stats-summary-box"></div>
+    </div>
+
+</div>
+
+<!-- 需求 1：管理員修改訂單視窗 (可編輯品項數量) -->
+<div id="editOrderModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; font-weight:600;">修改訂單資料</h3>
+        <input type="hidden" id="edit-order-id">
+        <div class="form-group">
+            <label>訂購人姓名</label>
+            <input type="text" id="edit-buyer-name">
+        </div>
+        <div class="form-group">
+            <label>聯絡電話</label>
+            <input type="text" id="edit-buyer-phone">
+        </div>
+        <div class="form-group">
+            <label>寄送地址</label>
+            <input type="text" id="edit-buyer-address">
+        </div>
+        
+        <h4 style="margin: 20px 0 10px 0; font-weight: 600;">訂購品項與數量修改：</h4>
+        <div id="edit-items-container"></div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+            <button class="btn btn-secondary" onclick="closeEditModal()">取消</button>
+            <button class="btn" onclick="saveOrderEdit()">儲存修改</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const storeMaster = {
+        "AE001": "永慶台東傳廣加盟店","DC002": "永慶高雄尖美加盟店","DC010": "永慶高雄明誠加盟店","DC019": "永慶高雄新堀江鴻麗加盟店","DC025": "永慶高雄左營高鐵加盟店","DC029": "永慶高雄中華藝校加盟店","DC032": "永慶高雄美術北三加盟店","DC040": "永慶高雄R14文信加盟店","DC043": "永慶高雄五福加盟店","DC045": "永慶高雄五甲捷運加盟店","DC046": "永慶高雄農十六加盟店","DC051": "永慶高雄巨蛋凱璿加盟店","DC054": "永慶高雄亞灣童心加盟店","DC060": "永慶高雄博愛凱璿加盟店","DC062": "永慶高雄總圖凱璿加盟店","DC066": "永慶農十六凱璿加盟店","DC069": "永慶高雄中山凱璿加盟店","DC078": "永慶楠梓高雄大學加盟店","DC088": "永慶高雄中華明誠加盟店","DC092": "永慶衛武營新富加盟店","DC094": "永慶農十六神農加盟店","DC096": "永慶高雄巨蛋裕誠加盟店","DC100": "永慶高雄富國鴻麗加盟店","DC103": "永慶高雄楠梓土庫加盟店","DC105": "永慶高雄明誠河堤加盟店","DC106": "永慶高雄左營至聖加盟店","DC110": "永慶籬仔內瑞豐加盟店","DC111": "永慶高雄美術鴻麗加盟店","DC114": "永慶高雄楠梓莒光加盟店","DC120": "永慶高雄大順鴻麗加盟店","DC122": "永慶高雄仁武仁雄加盟店","DC125": "永慶高雄文化青年加盟店","DC131": "永慶北高雄家樂福加盟店","DC132": "永慶楠梓德賢德惠加盟店","DC133": "永慶楠梓援中河堤加盟店","DC136": "永慶高雄三多SOGO加盟店","DC138": "永慶高雄楠梓國中加盟店","DC139": "永慶高雄大樂河堤加盟店","DC140": "永慶鳳山文山文衡加盟店","DC141": "永慶楠梓高大藍田加盟店","DC142": "永慶高雄復興青年加盟店","DC143": "永慶高雄陽明覺民加盟店","DC144": "永慶高雄七賢河東加盟店","DC145": "永慶高雄美術明誠加盟店","DC146": "永慶高雄至真博愛加盟店","DC148": "永慶高雄瑞隆鳳甲加盟店","DC150": "永慶鳳山文山建國加盟店","DC151": "永慶高雄五甲中山加盟店","DC152": "永慶仁武八德永仁加盟店","DC154": "永慶高雄左營國中加盟店","DC155": "永慶高雄亞灣漢神加盟店","DC157": "永慶高雄市政總裁加盟店","DC158": "永慶高雄文山帝寶加盟店","DC159": "永慶高雄站前美家加盟店","DC160": "永慶高雄九如陽明加盟店","DC162": "永慶高雄美術南二加盟店","DC163": "永慶高雄十全博愛加盟店","DC164": "永慶新堀江忠孝加盟店","DC165": "永慶高雄岡山站前加盟店","DC167": "永慶高雄博愛同盟加盟店","DC168": "永慶高雄岡山國宅加盟店","DC169": "永慶高雄龍華國中加盟店","DC170": "永慶高雄華夏新莊加盟店","DC172": "永慶五甲家樂福加盟店","DC173": "永慶鳳山新甲新富加盟店","DC174": "永慶高雄一心光華加盟店","DC175": "永慶楠梓中山高中加盟店","DC176": "永慶高雄科大海專加盟店","DC177": "永慶高雄R13忠言加盟店","DC178": "永慶高雄美術美家加盟店","DC179": "永慶高雄巨蛋圓盛加盟店","DC180": "永慶高雄文山澄清加盟店","DC181": "永慶高雄美術願景加盟店","DC183": "永慶高雄大順自由加盟店","DC184": "永慶高雄高鐵美家加盟店","DC185": "永慶高雄三民家商加盟店","DC186": "永慶高雄文山文安加盟店","DC187": "永慶鳳山三民光遠加盟店","DC188": "永慶高雄美術禾沐加盟店","DC189": "永慶高雄福德三多加盟店","DC190": "永慶高雄路竹美美加盟店","DC191": "永慶高雄岡山美美加盟店","DC192": "永慶高雄自由盛閎加盟店","DC193": "永慶新楠家樂福加盟店","DC194": "永慶高美館明誠加盟店","DC195": "永慶高雄美術帝門加盟店","DC196": "永慶農十六美家加盟店","DC197": "永慶高雄市府興中加盟店","DC198": "永慶高雄自由新莊加盟店","DC199": "永慶高科大正忠加盟店","DC200": "永慶高雄橋科成功加盟店","DC201": "永慶橋科青埔捷運加盟店","DC202": "永慶高雄鳳南鳳甲加盟店","DC203": "永慶高雄中都十全加盟店","DC204": "永慶高雄高大亞聯加盟店","DC205": "永慶高雄中華青海加盟店","DC206": "永慶高雄陽明澄和加盟店","DC207": "永慶高雄亞灣中華加盟店","DD001": "永慶屏東忠孝加盟店","DD002": "永慶屏東自由加盟店","DD005": "永慶屏東站前加盟店","DD006": "永慶屏東廣東加盟店","DD011": "永慶屏東潮州興隆加盟店","DD012": "永慶屏東縣府加盟店","DD013": "永慶屏東中正文傳加盟店","DE001": "永慶澎湖馬公加盟店","HC001": "永義高雄大順龍華加盟店","HC003": "永義高雄農16至聖加盟店","HC004": "永義農十六明華加盟店","HC005": "永義高雄五甲捷運加盟店","HC006": "永義高雄高鐵重愛加盟店","HC007": "永義高雄巨蛋新莊加盟店","HC009": "永義高雄巨蛋明華加盟店","HC010": "永義高雄八德站前加盟店","HC011": "永義高雄富國龍華加盟店","HC012": "永義高雄明誠自由加盟店","HC013": "永義北高楠梓泰揚加盟店","HC014": "永義高雄美術麗鼎加盟店","HC015": "永義楠梓後昌新路加盟店","HC016": "永義農十六大千加盟店","HC017": "永義高雄瑞隆鳳甲加盟店","HC018": "永義高雄高鐵自由加盟店","HC019": "永義高雄十全美都加盟店","HC020": "永義高雄同盟自由加盟店","HC021": "永義高雄楠梓站前加盟店","HC022": "永義高雄楠梓國中加盟店","HC023": "永義楠梓高大藍田加盟店","HC024": "永義楠梓高大展昕加盟店","HC026": "永義高雄巨蛋文信加盟店","HC027": "永義高雄博愛孟子加盟店","HC028": "永義高雄美術擁樂加盟店","HC029": "永義農十六裕國加盟店","HC030": "永義前鎮廣西民權加盟店","HC031": "永義高雄大樂明誠加盟店","HC032": "永義高雄岡山文化加盟店","HC033": "永義三民大昌覺民加盟店","HC034": "永義高雄自由碧發加盟店","HC035": "永義高雄裕誠自由加盟店","HC037": "永義高雄大樂河堤加盟店","HC038": "永義高雄樹禾美都加盟店","HC039": "永義高雄鳳山站前光復加盟店","HC040": "永義楠梓土庫清豐加盟店","HC041": "永義左營龍華至聖加盟店","HC042": "永義漢神巨蛋至真加盟店","HC043": "永義亞灣正勤成功加盟店","HC044": "永義楠梓益群藍田加盟店","HC045": "永義左營重信華夏加盟店","HC046": "永義農十六明倫加盟店","HC047": "永義高雄光華四維加盟店","HC048": "永義高雄大同中山加盟店","HC050": "永義岡山RK1中山加盟店","HC051": "永義三多捷運一心加盟店","HC052": "永義高雄美術龍水加盟店","HC054": "永義楠梓右昌德民加盟店","HC055": "永義高雄三多民權加盟店","HC056": "永義高雄孟子自由加盟店","HC058": "永義高雄明華自由加盟店","HC059": "永義楠梓藍田大學加盟店","HC061": "永義左營大中文川加盟店","HC062": "永義高雄師大和平加盟店","HC065": "永義高雄覺民正忠加盟店","HC066": "永義楠梓莒光軍校加盟店","HC067": "永義高雄民生威欣加盟店","HC068": "永義高雄大順麗鼎加盟店","HC072": "永義鳳山文化岠鋐加盟店","HC073": "永義橋科青埔筌加盟店","HC074": "永義高雄義享天地加盟店","HC075": "永義楠梓仁大興楠加盟店","HC076": "永義北高楠梓鈗鼎加盟店","HC078": "永義高雄裕誠富民加盟店","HC079": "永義龍華國小昕鎵加盟店","HC082": "永義高雄大順龍德加盟店","HD001": "永義屏東崇蘭文傳加盟店","HD002": "永義潮州齊立新加盟店","HD003": "永義屏東民生民和加盟店","HD004": "永義屏東大連千禧加盟店","HD005": "永義屏東縣府自由加盟店","UF002": "有巢氏台東傳廣加盟店","UF003": "有巢氏台東新生南京加盟店","XC007": "有巢氏高醫十全加盟店","XC030": "有巢氏高雄美術之星加盟店","XC034": "有巢氏高雄裕誠河堤加盟店","XC043": "有巢氏永豐瑞隆加盟店","XC051": "有巢氏高雄陽明文山加盟店","XC052": "有巢氏左營福山重愛加盟店","XC055": "有巢氏鼎山家樂福加盟店","XC057": "有巢氏左營重和自由加盟店","XC059": "有巢氏高雄大順鼎山加盟店","XC060": "有巢氏高雄高鐵豐盛加盟店","XC062": "有巢氏高雄七賢中山加盟店","XC063": "有巢氏高雄博愛曾子加盟店","XC064": "有巢氏三民正忠綋杺加盟店","XC066": "有巢氏高雄大學援中加盟店","XC067": "有巢氏高雄岡山國宅加盟店","XC068": "有巢氏高雄楠梓國中加盟店","XD001": "有巢氏屏東東港加盟店","XD005": "有巢氏屏東和平加盟店","XD006": "有巢氏屏東潮州加盟店","XD009": "有巢氏屏東枋寮臨海加盟店","XD010": "有巢氏屏東勝利文傳加盟店","XD011": "有巢氏恆春省北加盟店","XD012": "有巢氏愛國敦化加盟店","XD013": "有巢氏東港中正興東加盟店","XD014": "有巢氏屏東中正SOGO加盟店","XE002": "有巢氏澎湖馬公加盟店","MF001": "台慶台東傳廣加盟店","MF003": "台慶台東中華東大加盟店","PC002": "台慶高雄幸福美術加盟店","PC007": "台慶左營龍華富國加盟店","PC022": "台慶高雄自由百序加盟店","PC023": "台慶高雄重和高鐵加盟店","PC025": "台慶鳳山青年文化加盟店","PC027": "台慶岡山介壽大義加盟店","PC028": "台慶高雄鼎金鼎力加盟店","PC029": "台慶鳳山光復加盟店","PC030": "台慶高雄一心民權加盟店","PC031": "台慶高雄博愛忠言加盟店","PC035": "台慶高雄苓雅中山加盟店","PC037": "台慶高雄澄清加盟店","PC038": "台慶高雄瑞豐華榮加盟店","PC045": "台慶高雄農十六龍德加盟店","PC047": "台慶高科大建工加盟店","PC051": "台慶高雄岡山站前加盟店","PC052": "台慶高雄R15孟子加盟店","PC054": "台慶高雄仁武大灣國中加盟店","PC055": "台慶高雄岡山國宅加盟店","PC056": "台慶高雄中正文化加盟店","PC057": "台慶高雄農美加盟店","PC058": "台慶高雄巨蛋捷運加盟店","PC060": "台慶衛武營南京加盟店","PC061": "台慶高雄博愛明誠加盟店","PC062": "台慶高雄女中加盟店","PC063": "台慶高雄右昌莒光加盟店","PC066": "台慶大東文藝中心加盟店","PC067": "台慶亞灣區中華加盟店","PC068": "台慶高雄自由明誠加盟店","PC069": "台慶高雄中正美麗加盟店","PC070": "台慶高雄陽明國中加盟店","PC070": "台慶岡山河堤公園加盟店","PC072": "台慶鳳山五甲保泰加盟店","PC073": "台慶高雄R13忠言加盟店","PC074": "台慶高雄正興百駿加盟店","PC075": "台慶高雄武慶三多加盟店","PC077": "台慶高雄十全十美加盟店","PC078": "台慶高雄霞海榮總加盟店","PC080": "台慶高雄三民大昌加盟店","PC081": "台慶高雄楠科德民加盟店","PC083": "台慶高雄自由明華加盟店","PC084": "台慶三民義華正忠加盟店","PC084": "台慶鳳山中山博愛加盟店","PC085": "台慶高雄微笑文自加盟店","PC087": "台慶高雄八德站前加盟店","PC088": "台慶楠梓國昌國中加盟店","PC091": "台慶高雄農十六捷運加盟店","PC092": "台慶高雄陽明國小加盟店","PC093": "台慶高雄青年中山加盟店","PC095": "台慶新民國小加盟店","PC096": "台慶高雄博愛巨蛋加盟店","PC098": "台慶小港宏平金府加盟店","PC099": "台慶高雄東四高美加盟店","PC102": "台慶路竹科學園區加盟店","PC104": "台慶高雄中華美術加盟店","PC107": "台慶高雄三多林森加盟店","PC108": "台慶高雄美術美學加盟店","PC110": "台慶高雄臥龍加盟店","PC111": "台慶高雄河堤國小加盟店","PC112": "台慶高雄華夏崇德加盟店","PC113": "台慶高雄崇德立大加盟店","PC114": "台慶高雄富國明華加盟店","PC115": "台慶高雄河堤裕誠加盟店","PC116": "台慶左營高鐵福山加盟店","PC118": "台慶鼓山中華自強加盟店","PC119": "台慶高雄巨蛋明華加盟店","PC120": "台慶高雄裕誠自由加盟店","PC122": "台慶楠梓德賢德惠加盟店","PC126": "台慶高雄六合中山加盟店","PC127": "台慶高雄五甲鳳南加盟店","PC128": "台慶高雄桂林鳳頂加盟店","PC129": "台慶楠梓高大藍昌加盟店","PC131": "台慶高雄富民明華加盟店","PC132": "台慶高雄大寮鳳屏加盟店","PC133": "台慶衛武營鳳西加盟店","PC134": "台慶鼎山家樂福加盟店","PC135": "台慶鳳山五甲凱旋加盟店","PC137": "台慶高雄六合利揚加盟店","PC139": "台慶鳳山安家天下加盟店","PC140": "台慶高雄楠梓後昌加宏加盟店","PC141": "台慶高雄楠梓樂群加盟店","PC142": "台慶高雄莊敬國小加盟店","PC144": "台慶高雄華夏南屏加盟店","PC145": "台慶高雄富國至聖加盟店","PC146": "台慶高雄新都廳加盟店","PC147": "台慶高雄師大三多加盟店","PC148": "台慶左營新光國小加盟店","PC149": "台慶鳳甲紅毛港加盟店","PC151": "台慶鳳山武慶二聖加盟店","PC153": "台慶高大家樂福加盟店","PC154": "台慶左營富民至聖加盟店","PC155": "台慶橋頭青埔捷運加盟店","PC156": "台慶高雄R7民權加盟店","PC157": "台慶高雄孟子新光加盟店","PC158": "台慶高雄二聖民權加盟店","PC159": "台慶北高華夏鑫富加盟店","PC160": "台慶高雄大樂聯興加盟店","PC161": "台慶高雄自由貴族加盟店","PC164": "台慶楠梓高大藍田加盟店","PC165": "台慶楠梓科技德賢加盟店","PC168": "台慶北高孟子群鑫加盟店","PC169": "台慶高雄福山鑫富加盟店","PC170": "台慶高雄中華十全加盟店","PC170": "台慶高雄岡山民治加盟店","PC171": "台慶岡山双鐵中山加盟店","PC172": "台慶高雄遠百一心加盟店","PC174": "台慶高雄青年中華加盟店","PC176": "台慶高雄華鳳文龍加盟店","PC178": "台慶高雄高鐵重信加盟店","PC180": "台慶高雄文化四維加盟店","PC181": "台慶小港漢民康莊加盟店","PC182": "台慶高雄R14立文加盟店","PC184": "台慶高雄大順建國加盟店","PC185": "台慶三民義大大昌加盟店","PC186": "台慶高雄三井中山加盟店","PC189": "台慶高雄文山青年加盟店","PC190": "台慶高雄中華青海加盟店","PC191": "台慶高雄崇德文強加盟店","PC192": "台慶左營國中曾子加盟店","PC193": "台慶高雄陽光美術加盟店","PC196": "台慶鳳山大東公園加盟店","PC199": "台慶農十六譽鼎加盟店","PC200": "台慶高雄正忠義華加盟店","PD003": "台慶屏東東港光復加盟店","PD006": "台慶屏東中山公園加盟店","PD007": "台慶屏東大學加盟店","PD008": "台慶屏東驛站加盟店","PD009": "台慶屏東潮州文化加盟店","PD010": "台慶屏東勝利新城加盟店","PD011": "台慶屏東建國文傳加盟店","PD012": "台慶屏東博愛廣東加盟店","PD017": "台慶屏東自由博愛加盟店","PD018": "台慶屏東藝術和平加盟店","PD019": "台慶屏東廣東翊翔加盟店","PD020": "台慶屏東內埔南寧加盟店","PE001": "台慶澎湖馬公成功加盟店","PO015": "台慶屏東台糖加盟店","PO019": "台慶屏東廣東翊翔加盟店","00000": "經管會專用"
+    };
+
+    const products = [
+        { id: 1, vendor: "漢來大飯店", title: "漢來情月．典藏禮盒", price: 1880, img: "images/漢來01.jpg"},
+        { id: 2, vendor: "漢來大飯店", title: "漢來情月．風雅禮盒", price: 1380, img: "images/漢來02.jpg" },
+        { id: 3, vendor: "高雄萬豪酒店", title: "豪月廣式禮盒", price: 1760, img: "images/萬豪01.jpg" }
+    ];
+
+    let currentUser = null;
+    let cart = {};
+
+    function getRegisteredStores() {
+        return JSON.parse(localStorage.getItem('mooncake_registered_stores')) || {};
+    }
+
+    function saveRegisteredStores(stores) {
+        localStorage.setItem('mooncake_registered_stores', JSON.stringify(stores));
+    }
+
+    function getAllOrders() {
+        return JSON.parse(localStorage.getItem('mooncake_all_orders')) || [];
+    }
+
+    function saveAllOrders(orders) {
+        localStorage.setItem('mooncake_all_orders', JSON.stringify(orders));
+    }
+
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+    }
+
+    function switchAuthTab(type) {
+        const loginSec = document.getElementById('login-section');
+        const regSec = document.getElementById('register-section');
+        const loginBtn = document.getElementById('tab-login-btn');
+        const regBtn = document.getElementById('tab-register-btn');
+
+        if (type === 'register') {
+            loginSec.style.display = 'none';
+            regSec.style.display = 'block';
+            loginBtn.classList.remove('active-tab');
+            regBtn.classList.add('active-tab');
+        } else {
+            loginSec.style.display = 'block';
+            regSec.style.display = 'none';
+            loginBtn.classList.add('active-tab');
+            regBtn.classList.remove('active-tab');
+        }
+    }
+
+    function autoFillStoreName() {
+        const id = document.getElementById('reg-store-id').value.trim().toUpperCase();
+        document.getElementById('reg-store-name').value = storeMaster[id] || "查無此店代號";
+    }
+
+    // 需求 6：註冊時記錄註冊人姓名與電話
+    function handleRegister() {
+        const id = document.getElementById('reg-store-id').value.trim().toUpperCase();
+        const name = storeMaster[id];
+        const pass = document.getElementById('reg-password').value;
+        const registrantName = document.getElementById('reg-registrant-name').value.trim();
+        const registrantPhone = document.getElementById('reg-registrant-phone').value.trim();
+
+        if (!name) { alert("請輸入正確的店代號！"); return; }
+        if (!pass) { alert("請設定密碼！"); return; }
+        if (!registrantName) { alert("請輸入註冊人姓名！"); return; }
+        if (!registrantPhone) { alert("請輸入註冊人電話！"); return; }
+
+        const registeredStores = getRegisteredStores();
+
+        if (registeredStores[id]) { 
+            alert("該店代號已經註冊過，請直接登入！"); 
+            switchAuthTab('login');
+            document.getElementById('login-store-id').value = id;
+            return; 
+        }
+
+        registeredStores[id] = { 
+            storeId: id, 
+            storeName: name, 
+            password: pass,
+            registrantName: registrantName,
+            registrantPhone: registrantPhone
+        };
+        saveRegisteredStores(registeredStores);
+
+        alert("註冊成功！已為您自動登入。");
+        loginSuccess(registeredStores[id]);
+    }
+
+    function handleLogin() {
+        const id = document.getElementById('login-store-id').value.trim().toUpperCase();
+        const pass = document.getElementById('login-password').value;
+
+        if (!id || !pass) { alert("請輸入店代號與密碼！"); return; }
+
+        const registeredStores = getRegisteredStores();
+
+        if (!registeredStores[id]) {
+            alert("該店代號尚未註冊，請先點選「新店註冊」！");
+            return;
+        }
+
+        if (registeredStores[id].password !== pass) {
+            alert("密碼錯誤");
+            return;
+        }
+
+        loginSuccess(registeredStores[id]);
+    }
+
+    function loginSuccess(userObj) {
+        currentUser = userObj;
+        document.getElementById('nav-actions').style.display = 'block';
+        document.getElementById('user-display').innerText = `${currentUser.storeName} (${currentUser.storeId})`;
+        document.getElementById('admin-pass-btn').style.display = 'none';
+        document.getElementById('admin-stats-btn').style.display = 'none';
+
+        renderProducts();
+        showPage('page2');
+    }
+
+    function adminLogin() {
+        const u = document.getElementById('admin-user').value;
+        const p = document.getElementById('admin-pass').value;
+        if (u === "admin" && p === "admin123") {
+            currentUser = { isAdmin: true, storeName: "總公司管理員" };
+            document.getElementById('nav-actions').style.display = 'block';
+            document.getElementById('user-display').innerText = "🔑 總公司管理員";
+            document.getElementById('admin-pass-btn').style.display = 'inline-block';
+            document.getElementById('admin-stats-btn').style.display = 'inline-block';
+            showHistory();
+        } else {
+            alert("管理員帳密錯誤！");
+        }
+    }
+
+    function logout() {
+        location.reload();
+    }
+
+    function renderProducts() {
+        const list = document.getElementById('product-list');
+        list.innerHTML = products.map(p => `
+            <div class="product-card">
+                <img src="${p.img}" class="product-img">
+                <div style="flex:1;">
+                    <small style="color:var(--text-muted);">[${p.vendor}]</small>
+                    <h4 style="margin:4px 0 8px 0; font-size:1.05rem;">${p.title}</h4>
+                    <div style="font-weight:600; font-size:1.1rem;">$${p.price}</div>
+                </div>
+                <div style="display:flex; align-items:center;">
+                    <button class="btn btn-secondary" style="padding:6px 12px;" onclick="updateQty(${p.id}, -1)">-</button>
+                    <span id="qty-${p.id}" style="margin:0 12px; font-weight:600;">${cart[p.id] || 0}</span>
+                    <button class="btn btn-secondary" style="padding:6px 12px;" onclick="updateQty(${p.id}, 1)">+</button>
+                </div>
+            </div>
+        `).join('');
+        updateTotal();
+    }
+
+    function updateQty(id, change) {
+        cart[id] = (cart[id] || 0) + change;
+        if (cart[id] < 0) cart[id] = 0;
+        document.getElementById(`qty-${id}`).innerText = cart[id];
+        updateTotal();
+    }
+
+    function updateTotal() {
+        let qty = 0, total = 0;
+        products.forEach(p => {
+            const count = cart[p.id] || 0;
+            qty += count;
+            total += count * p.price;
+        });
+        document.getElementById('cart-qty').innerText = qty;
+        document.getElementById('cart-total').innerText = total;
+    }
+
+    function goToCheckout() {
+        let totalQty = Object.values(cart).reduce((a, b) => a + b, 0);
+        if (totalQty === 0) { alert("請至少選擇一項月餅！"); return; }
+
+        let summaryHtml = "<table><tr><th>廠商</th><th>品項</th><th>單價</th><th>數量</th><th>小計</th></tr>";
+        let grandTotal = 0;
+        products.forEach(p => {
+            let count = cart[p.id] || 0;
+            if (count > 0) {
+                let subtotal = count * p.price;
+                grandTotal += subtotal;
+                summaryHtml += `<tr><td>${p.vendor}</td><td>${p.title}</td><td>$${p.price}</td><td>${count}</td><td>$${subtotal}</td></tr>`;
+            }
+        });
+        summaryHtml += `</table><p align="right" style="font-size:1.1rem;"><strong>總計：$${grandTotal}</strong></p>`;
+        document.getElementById('checkout-summary').innerHTML = summaryHtml;
+        showPage('page3');
+    }
+
+    function submitOrder() {
+        const name = document.getElementById('buyer-name').value;
+        const phone = document.getElementById('buyer-phone').value;
+        const address = document.getElementById('buyer-address').value;
+
+        if (!name || !phone || !address) { alert("請完整填寫寄送資訊！"); return; }
+
+        let total = 0;
+        let items = [];
+        products.forEach(p => {
+            if (cart[p.id] > 0) {
+                items.push({ id: p.id, vendor: p.vendor, title: p.title, price: p.price, qty: cart[p.id] });
+                total += p.price * cart[p.id];
+            }
+        });
+
+        const newOrder = {
+            orderId: "ORD" + Date.now().toString().slice(-6),
+            storeId: currentUser.storeId,
+            storeName: currentUser.storeName,
+            buyerName: name,
+            buyerPhone: phone,
+            buyerAddress: address,
+            items: items,
+            totalAmount: total,
+            date: new Date().toLocaleString()
+        };
+
+        const allOrders = getAllOrders();
+        allOrders.push(newOrder);
+        saveAllOrders(allOrders);
+
+        document.getElementById('order-success-info').innerHTML = `
+            <p><strong>訂單編號：</strong>${newOrder.orderId}</p>
+            <p><strong>訂購門市：</strong>${newOrder.storeName} (${newOrder.storeId})</p>
+            <p><strong>訂購人：</strong>${newOrder.buyerName} (${newOrder.buyerPhone})</p>
+            <p><strong>寄送地址：</strong>${newOrder.buyerAddress}</p>
+            <p><strong>總金額：</strong>$${newOrder.totalAmount}</p>
+        `;
+        showPage('page4');
+    }
+
+    // 需求 4：繼續訂購時清空數量與表單
+    function resetAndContinueShopping() {
+        cart = {};
+        document.getElementById('buyer-name').value = '';
+        document.getElementById('buyer-phone').value = '';
+        document.getElementById('buyer-address').value = '';
+        renderProducts();
+        showPage('page2');
+    }
+
+    function showHistory() {
+        const adminSearchArea = document.getElementById('admin-search-area');
+        const backBtn = document.getElementById('back-to-shop-btn');
+
+        if (currentUser.isAdmin) {
+            document.getElementById('history-title').innerText = "🔑 管理員後台 - 全公司訂單明細";
+            adminSearchArea.style.display = 'flex';
+            backBtn.style.display = 'none';
+        } else {
+            document.getElementById('history-title').innerText = "📦 我的歷史訂單紀錄";
+            adminSearchArea.style.display = 'none';
+            backBtn.style.display = 'inline-block';
+        }
+
+        renderOrdersList();
+        showPage('page-history');
+    }
+
+    function renderOrdersList(keyword = "") {
+        const allOrders = getAllOrders();
+        let filterOrders = [];
+
+        if (currentUser.isAdmin) {
+            const kw = keyword.toLowerCase();
+            filterOrders = allOrders.filter(o => 
+                o.storeId.toLowerCase().includes(kw) || 
+                o.orderId.toLowerCase().includes(kw)
+            );
+        } else {
+            filterOrders = allOrders.filter(o => o.storeId === currentUser.storeId);
+        }
+
+        let historyHtml = "";
+        if (filterOrders.length === 0) {
+            historyHtml = `<p style="color:var(--text-muted); padding:20px 0;">${keyword ? '查無符合條件的訂單' : '目前尚無訂單紀錄'}</p>`;
+        } else {
+            filterOrders.slice().reverse().forEach(o => {
+                let itemsDetail = o.items.map(i => `${i.title} x ${i.qty}`).join('、');
+                
+                let adminActionBtns = "";
+                if (currentUser.isAdmin) {
+                    adminActionBtns = `
+                        <div style="margin-top:15px; border-top:1px dashed var(--border-color); padding-top:12px; display:flex; justify-content:flex-end; gap:8px;">
+                            <button class="btn btn-secondary" onclick="openEditModal('${o.orderId}')">編輯訂單</button>
+                            <button class="btn btn-danger" onclick="deleteOrder('${o.orderId}')">刪除訂單</button>
+                        </div>
+                    `;
+                }
+
+                historyHtml += `
+                    <div style="border:1px solid var(--border-color); padding:20px; margin-bottom:12px; border-radius:12px; background:#fff;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
+                            <strong>訂單編號：${o.orderId}</strong>
+                            <small style="color:var(--text-muted);">${o.date}</small>
+                        </div>
+                        <div style="line-height:1.6; font-size:0.9rem;">
+                            <div><strong>訂購門市：</strong>${o.storeName} (${o.storeId})</div>
+                            <div><strong>訂購者資訊：</strong>${o.buyerName} / ${o.buyerPhone}</div>
+                            <div><strong>寄送地址：</strong>${o.buyerAddress}</div>
+                            <div style="margin-top:5px;"><strong>訂購品項：</strong>${itemsDetail}</div>
+                        </div>
+                        <div style="margin-top:12px; text-align:right; font-weight:600; font-size:1.1rem;">
+                            總金額：$${o.totalAmount}
+                        </div>
+                        ${adminActionBtns}
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('history-list').innerHTML = historyHtml;
+    }
+
+    function filterOrders() {
+        const keyword = document.getElementById('search-keyword').value.trim();
+        renderOrdersList(keyword);
+    }
+
+    function clearSearch() {
+        document.getElementById('search-keyword').value = "";
+        renderOrdersList();
+    }
+
+    // 需求 1：管理員編輯訂單 (可修改品項)
+    function openEditModal(orderId) {
+        const allOrders = getAllOrders();
+        const order = allOrders.find(o => o.orderId === orderId);
+        if (!order) return;
+
+        document.getElementById('edit-order-id').value = order.orderId;
+        document.getElementById('edit-buyer-name').value = order.buyerName;
+        document.getElementById('edit-buyer-phone').value = order.buyerPhone;
+        document.getElementById('edit-buyer-address').value = order.buyerAddress;
+
+        let itemsHtml = "";
+        products.forEach(p => {
+            const existingItem = order.items.find(i => i.title === p.title || i.id === p.id);
+            const qty = existingItem ? existingItem.qty : 0;
+            itemsHtml += `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #f0f0f0; padding-bottom:8px;">
+                    <div>
+                        <div style="font-weight:500;">${p.title}</div>
+                        <small style="color:var(--text-muted);">$${p.price} / 盒</small>
+                    </div>
+                    <div>
+                        <input type="number" id="edit-prod-${p.id}" value="${qty}" min="0" style="width:70px; padding:6px; border:1px solid var(--border-color); border-radius:6px; text-align:center;">
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('edit-items-container').innerHTML = itemsHtml;
+        document.getElementById('editOrderModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editOrderModal').style.display = 'none';
+    }
+
+    function saveOrderEdit() {
+        const orderId = document.getElementById('edit-order-id').value;
+        const allOrders = getAllOrders();
+        const index = allOrders.findIndex(o => o.orderId === orderId);
+        if (index === -1) return;
+
+        let updatedItems = [];
+        let newTotal = 0;
+
+        products.forEach(p => {
+            const inputQty = parseInt(document.getElementById(`edit-prod-${p.id}`).value) || 0;
+            if (inputQty > 0) {
+                updatedItems.push({
+                    id: p.id,
+                    vendor: p.vendor,
+                    title: p.title,
+                    price: p.price,
+                    qty: inputQty
+                });
+                newTotal += p.price * inputQty;
+            }
+        });
+
+        allOrders[index].buyerName = document.getElementById('edit-buyer-name').value;
+        allOrders[index].buyerPhone = document.getElementById('edit-buyer-phone').value;
+        allOrders[index].buyerAddress = document.getElementById('edit-buyer-address').value;
+        allOrders[index].items = updatedItems;
+        allOrders[index].totalAmount = newTotal;
+
+        saveAllOrders(allOrders);
+        closeEditModal();
+        renderOrdersList(document.getElementById('search-keyword').value.trim());
+        alert("訂單已更新完成！");
+    }
+
+    function deleteOrder(orderId) {
+        if (!confirm(`確定要刪除訂單 ${orderId} 嗎？`)) return;
+        let allOrders = getAllOrders();
+        allOrders = allOrders.filter(o => o.orderId !== orderId);
+        saveAllOrders(allOrders);
+        renderOrdersList(document.getElementById('search-keyword').value.trim());
+    }
+
+    // 需求 7 & 3：密碼查詢頁面顯示姓名電話與刪除帳號重置
+    function showPasswordManage() {
+        renderPasswordList();
+        showPage('page-passwords');
+    }
+
+    function renderPasswordList() {
+        const stores = getRegisteredStores();
+        const kw = document.getElementById('search-store-pwd').value.trim().toUpperCase();
+        
+        let html = "<table><tr><th>店代號</th><th>店名稱</th><th>密碼</th><th>註冊人姓名</th><th>註冊人電話</th><th>操作</th></tr>";
+        let count = 0;
+
+        Object.keys(stores).forEach(id => {
+            if (!kw || id.includes(kw)) {
+                count++;
+                const s = stores[id];
+                html += `
+                    <tr>
+                        <td><strong>${s.storeId}</strong></td>
+                        <td>${s.storeName}</td>
+                        <td><code>${s.password}</code></td>
+                        <td>${s.registrantName || '-'}</td>
+                        <td>${s.registrantPhone || '-'}</td>
+                        <td>
+                            <button class="btn btn-danger" style="padding:4px 8px; font-size:0.8rem;" onclick="deleteStoreAccount('${s.storeId}')">刪除帳號</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+
+        html += "</table>";
+        if (count === 0) html = `<p style="color:var(--text-muted); padding:20px 0;">${kw ? '查無符合條件的加盟店' : '目前尚無註冊資料'}</p>`;
+        
+        document.getElementById('password-list').innerHTML = html;
+    }
+
+    // 需求 3：刪除帳號重置
+    function deleteStoreAccount(storeId) {
+        if (!confirm(`警告：刪除 ${storeId} 帳號將會重置該店密碼與該店所有訂單！確定刪除？`)) return;
+
+        // 1. 刪除註冊帳號
+        const stores = getRegisteredStores();
+        delete stores[storeId];
+        saveRegisteredStores(stores);
+
+        // 2. 刪除該店訂單
+        let allOrders = getAllOrders();
+        allOrders = allOrders.filter(o => o.storeId !== storeId);
+        saveAllOrders(allOrders);
+
+        alert(`已成功刪除 ${storeId} 帳號並重置相關資料。`);
+        renderPasswordList();
+    }
+
+    // 需求 2：訂購統計功能
+    function showStatsPage() {
+        renderStats();
+        showPage('page-stats');
+    }
+
+    function renderStats() {
+        const allOrders = getAllOrders();
+        let totalStats = {};
+        let grandTotalAmount = 0;
+        let grandTotalQty = 0;
+
+        products.forEach(p => {
+            totalStats[p.id] = { vendor: p.vendor, title: p.title, price: p.price, qty: 0, subtotal: 0 };
+        });
+
+        allOrders.forEach(o => {
+            if (o.items && Array.isArray(o.items)) {
+                o.items.forEach(i => {
+                    const matchedProd = products.find(p => p.title === i.title || p.id === i.id);
+                    if (matchedProd) {
+                        totalStats[matchedProd.id].qty += i.qty;
+                        totalStats[matchedProd.id].subtotal += i.qty * matchedProd.price;
+                        grandTotalQty += i.qty;
+                        grandTotalAmount += i.qty * matchedProd.price;
+                    }
+                });
+            }
+        });
+
+        let html = `
+            <div style="display:flex; gap:20px; margin-bottom:20px;">
+                <div style="flex:1; background:#fff; border:1px solid var(--border-color); padding:20px; border-radius:12px;">
+                    <small style="color:var(--text-muted);">累積預購總盒數</small>
+                    <div style="font-size:1.8rem; font-weight:600; margin-top:5px;">${grandTotalQty} <span style="font-size:1rem; font-weight:normal;">盒</span></div>
+                </div>
+                <div style="flex:1; background:#fff; border:1px solid var(--border-color); padding:20px; border-radius:12px;">
+                    <small style="color:var(--text-muted);">累積預購總金額</small>
+                    <div style="font-size:1.8rem; font-weight:600; margin-top:5px; color:#16a34a;">$${grandTotalAmount}</div>
+                </div>
+            </div>
+            <table>
+                <tr>
+                    <th>廠商</th>
+                    <th>品項</th>
+                    <th>單價</th>
+                    <th>目前訂購總數量</th>
+                    <th>總小計</th>
+                </tr>
+        `;
+
+        products.forEach(p => {
+            const stat = totalStats[p.id];
+            html += `
+                <tr>
+                    <td>${stat.vendor}</td>
+                    <td><strong>${stat.title}</strong></td>
+                    <td>$${stat.price}</td>
+                    <td><strong style="font-size:1.05rem;">${stat.qty}</strong> 盒</td>
+                    <td>$${stat.subtotal}</td>
+                </tr>
+            `;
+        });
+
+        html += `</table>`;
+        document.getElementById('stats-summary-box').innerHTML = html;
+    }
+</script>
+
+</body>
+</html>
