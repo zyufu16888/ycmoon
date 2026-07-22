@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>永慶四品牌中秋月餅訂購系統</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- 引入 Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-color: #fafafa;
@@ -388,7 +390,7 @@
                 </div>
             </div>
 
-            <!-- 2. 註冊區塊 (需求 6：新增註冊人姓名與電話) -->
+            <!-- 2. 註冊區塊 -->
             <div id="register-section" style="display: none;">
                 <div class="form-group">
                     <label>店代號</label>
@@ -428,7 +430,6 @@
             </div>
         </div>
 
-        <!-- 需求 5：右側滿版圖片放置 -->
         <div class="auth-right">
             <img src="images/中秋系統海報.png" class="auth-right-img-full" alt="中秋系統海報">
         </div>
@@ -484,7 +485,6 @@
     <div id="page4" class="page" style="text-align: center; padding: 40px 0;">
         <h3 style="color: var(--text-main); font-size: 1.5rem; margin-bottom: 20px;">🎉 訂購完成！</h3>
         <div id="order-success-info" style="background: #ffffff; border: 1px solid var(--border-color); padding: 25px; border-radius: 12px; text-align: left; max-width: 500px; margin: 0 auto 25px auto; line-height: 1.8;"></div>
-        <!-- 需求 4：重置購物與表單資訊 -->
         <button class="btn" onclick="resetAndContinueShopping()">繼續訂購</button>
     </div>
 
@@ -511,7 +511,7 @@
         <div id="password-list"></div>
     </div>
 
-    <!-- 需求 2：管理員專用 - 訂購統計頁面 -->
+    <!-- 管理員專用 - 訂購統計頁面 -->
     <div id="page-stats" class="page">
         <h3 style="font-weight: 600; margin-bottom: 20px;">📊 管理員後台 - 全系統訂購統計</h3>
         <div id="stats-summary-box"></div>
@@ -519,7 +519,7 @@
 
 </div>
 
-<!-- 需求 1：管理員修改訂單視窗 (可編輯品項數量) -->
+<!-- 管理員修改訂單視窗 -->
 <div id="editOrderModal" class="modal">
     <div class="modal-content">
         <h3 style="margin-top:0; font-weight:600;">修改訂單資料</h3>
@@ -548,149 +548,45 @@
 </div>
 
 <script>
+    // --- Supabase 初始化 ---
+    const SUPABASE_URL = "https://ksekakkniouknbbmvnuh.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_secret_8-rlgsJG7p1icYg8LYXBjA_XUhRmqfP";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const storeMaster = {
-        "AE001": "永慶台東傳廣加盟店","DC002": "永慶高雄尖美加盟店","DC010": "永慶高雄明誠加盟店",
-        "DC019": "永慶高雄新堀江鴻麗加盟店","DC025": "永慶高雄左營高鐵加盟店","DC029": "永慶高雄中華藝校加盟店",
-        "DC032": "永慶高雄美術北三加盟店","DC040": "永慶高雄R14文信加盟店","DC043": "永慶高雄五福加盟店",
-        "DC045": "永慶高雄五甲捷運加盟店","DC046": "永慶高雄農十六加盟店","DC051": "永慶高雄巨蛋凱璿加盟店",
-        "DC054": "永慶高雄亞灣童心加盟店","DC060": "永慶高雄博愛凱璿加盟店","DC062": "永慶高雄總圖凱璿加盟店",
-        "DC066": "永慶農十六凱璿加盟店","DC069": "永慶高雄中山凱璿加盟店","DC078": "永慶楠梓高雄大學加盟店",
-        "DC088": "永慶高雄中華明誠加盟店","DC092": "永慶衛武營新富加盟店","DC094": "永慶農十六神農加盟店",
-        "DC096": "永慶高雄巨蛋裕誠加盟店","DC100": "永慶高雄富國鴻麗加盟店","DC103": "永慶高雄楠梓土庫加盟店",
-        "DC105": "永慶高雄明誠河堤加盟店","DC106": "永慶高雄左營至聖加盟店","DC110": "永慶籬仔內瑞豐加盟店",
-        "DC111": "永慶高雄美術鴻麗加盟店","DC114": "永慶高雄楠梓莒光加盟店","DC120": "永慶高雄大順鴻麗加盟店",
-        "DC122": "永慶高雄仁武仁雄加盟店","DC125": "永慶高雄文化青年加盟店","DC131": "永慶北高雄家樂福加盟店",
-        "DC132": "永慶楠梓德賢德惠加盟店","DC133": "永慶楠梓援中河堤加盟店","DC136": "永慶高雄三多SOGO加盟店",
-        "DC138": "永慶高雄楠梓國中加盟店","DC139": "永慶高雄大樂河堤加盟店","DC140": "永慶鳳山文山文衡加盟店",
-        "DC141": "永慶楠梓高大藍田加盟店","DC142": "永慶高雄復興青年加盟店","DC143": "永慶高雄陽明覺民加盟店",
-        "DC144": "永慶高雄七賢河東加盟店","DC145": "永慶高雄美術明誠加盟店","DC146": "永慶高雄至真博愛加盟店",
-        "DC148": "永慶高雄瑞隆鳳甲加盟店","DC150": "永慶鳳山文山建國加盟店","DC151": "永慶高雄五甲中山加盟店",
-        "DC152": "永慶仁武八德永仁加盟店","DC154": "永慶高雄左營國中加盟店","DC155": "永慶高雄亞灣漢神加盟店",
-        "DC157": "永慶高雄市政總裁加盟店","DC158": "永慶高雄文山帝寶加盟店","DC159": "永慶高雄站前美家加盟店",
-        "DC160": "永慶高雄九如陽明加盟店","DC162": "永慶高雄美術南二加盟店","DC163": "永慶高雄十全博愛加盟店",
-        "DC164": "永慶新堀江忠孝加盟店","DC165": "永慶高雄岡山站前加盟店","DC167": "永慶高雄博愛同盟加盟店",
-        "DC168": "永慶高雄岡山國宅加盟店","DC169": "永慶高雄龍華國中加盟店","DC170": "永慶高雄華夏新莊加盟店",
-        "DC172": "永慶五甲家樂福加盟店","DC173": "永慶鳳山新甲新富加盟店","DC174": "永慶高雄一心光華加盟店",
-        "DC175": "永慶楠梓中山高中加盟店","DC176": "永慶高雄科大海專加盟店","DC177": "永慶高雄R13忠言加盟店",
-        "DC178": "永慶高雄美術美家加盟店","DC179": "永慶高雄巨蛋圓盛加盟店","DC180": "永慶高雄文山澄清加盟店",
-        "DC181": "永慶高雄美術願景加盟店","DC183": "永慶高雄大順自由加盟店","DC184": "永慶高雄高鐵美家加盟店",
-        "DC185": "永慶高雄三民家商加盟店","DC186": "永慶高雄文山文安加盟店","DC187": "永慶鳳山三民光遠加盟店",
-        "DC188": "永慶高雄美術禾沐加盟店","DC189": "永慶高雄福德三多加盟店","DC190": "永慶高雄路竹美美加盟店",
-        "DC191": "永慶高雄岡山美美加盟店","DC192": "永慶高雄自由盛閎加盟店","DC193": "永慶新楠家樂福加盟店",
-        "DC194": "永慶高美館明誠加盟店","DC195": "永慶高雄美術帝門加盟店","DC196": "永慶農十六美家加盟店",
-        "DC197": "永慶高雄市府興中加盟店","DC198": "永慶高雄自由新莊加盟店","DC199": "永慶高科大正忠加盟店",
-        "DC200": "永慶高雄橋科成功加盟店","DC201": "永慶橋科青埔捷運加盟店","DC202": "永慶高雄鳳南鳳甲加盟店",
-        "DC203": "永慶高雄中都十全加盟店","DC204": "永慶高雄高大亞聯加盟店","DC205": "永慶高雄中華青海加盟店",
-        "DC206": "永慶高雄陽明澄和加盟店","DC207": "永慶高雄亞灣中華加盟店","DD001": "永慶屏東忠孝加盟店",
-        "DD002": "永慶屏東自由加盟店","DD005": "永慶屏東站前加盟店","DD006": "永慶屏東廣東加盟店",
-        "DD011": "永慶屏東潮州興隆加盟店","DD012": "永慶屏東縣府加盟店","DD013": "永慶屏東中正文傳加盟店",
-        "DE001": "永慶澎湖馬公加盟店","HC001": "永義高雄大順龍華加盟店","HC003": "永義高雄農16至聖加盟店",
-        "HC004": "永義農十六明華加盟店","HC005": "永義高雄五甲捷運加盟店","HC006": "永義高雄高鐵重愛加盟店",
-        "HC007": "永義高雄巨蛋新莊加盟店","HC009": "永義高雄巨蛋明華加盟店","HC010": "永義高雄八德站前加盟店",
-        "HC011": "永義高雄富國龍華加盟店","HC012": "永義高雄明誠自由加盟店","HC013": "永義北高楠梓泰揚加盟店",
-        "HC014": "永義高雄美術麗鼎加盟店","HC015": "永義楠梓後昌新路加盟店","HC016": "永義農十六大千加盟店",
-        "HC017": "永義高雄瑞隆鳳甲加盟店","HC018": "永義高雄高鐵自由加盟店","HC019": "永義高雄十全美都加盟店",
-        "HC020": "永義高雄同盟自由加盟店","HC021": "永義高雄楠梓站前加盟店","HC022": "永義高雄楠梓國中加盟店",
-        "HC023": "永義楠梓高大藍田加盟店","HC024": "永義楠梓高大展昕加盟店","HC026": "永義高雄巨蛋文信加盟店",
-        "HC027": "永義高雄博愛孟子加盟店","HC028": "永義高雄美術擁樂加盟店","HC029": "永義農十六裕國加盟店",
-        "HC030": "永義前鎮廣西民權加盟店","HC031": "永義高雄大樂明誠加盟店","HC032": "永義高雄岡山文化加盟店",
-        "HC033": "永義三民大昌覺民加盟店","HC034": "永義高雄自由碧發加盟店","HC035": "永義高雄裕誠自由加盟店",
-        "HC037": "永義高雄大樂河堤加盟店","HC038": "永義高雄樹禾美都加盟店","HC039": "永義高雄鳳山站前光復加盟店",
-        "HC040": "永義楠梓土庫清豐加盟店","HC041": "永義左營龍華至聖加盟店","HC042": "永義漢神巨蛋至真加盟店",
-        "HC043": "永義亞灣正勤成功加盟店","HC044": "永義楠梓益群藍田加盟店","HC045": "永義左營重信華夏加盟店",
-        "HC046": "永義農十六明倫加盟店","HC047": "永義高雄光華四維加盟店","HC048": "永義高雄大同中山加盟店",
-        "HC050": "永義岡山RK1中山加盟店","HC051": "永義三多捷運一心加盟店","HC052": "永義高雄美術龍水加盟店",
-        "HC054": "永義楠梓右昌德民加盟店","HC055": "永義高雄三多民權加盟店","HC056": "永義高雄孟子自由加盟店",
-        "HC058": "永義高雄明華自由加盟店","HC059": "永義楠梓藍田大學加盟店","HC061": "永義左營大中文川加盟店",
-        "HC062": "永義高雄師大和平加盟店","HC065": "永義高雄覺民正忠加盟店","HC066": "永義楠梓莒光軍校加盟店",
-        "HC067": "永義高雄民生威欣加盟店","HC068": "永義高雄大順麗鼎加盟店","HC072": "永義鳳山文化岠鋐加盟店",
-        "HC073": "永義橋科青埔筌加盟店","HC074": "永義高雄義享天地加盟店","HC075": "永義楠梓仁大興楠加盟店",
-        "HC076": "永義北高楠梓鈗鼎加盟店","HC078": "永義高雄裕誠富民加盟店","HC079": "永義龍華國小昕鎵加盟店",
-        "HC082": "永義高雄大順龍德加盟店","HD001": "永義屏東崇蘭文傳加盟店","HD002": "永義潮州齊立新加盟店",
-        "HD003": "永義屏東民生民和加盟店","HD004": "永義屏東大連千禧加盟店","HD005": "永義屏東縣府自由加盟店",
-        "UF002": "有巢氏台東傳廣加盟店","UF003": "有巢氏台東新生南京加盟店","XC007": "有巢氏高醫十全加盟店",
-        "XC030": "有巢氏高雄美術之星加盟店","XC034": "有巢氏高雄裕誠河堤加盟店","XC043": "有巢氏永豐瑞隆加盟店",
-        "XC051": "有巢氏高雄陽明文山加盟店","XC052": "有巢氏左營福山重愛加盟店","XC055": "有巢氏鼎山家樂福加盟店",
-        "XC057": "有巢氏左營重和自由加盟店","XC059": "有巢氏高雄大順鼎山加盟店","XC060": "有巢氏高雄高鐵豐盛加盟店",
-        "XC062": "有巢氏高雄七賢中山加盟店","XC063": "有巢氏高雄博愛曾子加盟店","XC064": "有巢氏三民正忠綋杺加盟店",
-        "XC066": "有巢氏高雄大學援中加盟店","XC067": "有巢氏高雄岡山國宅加盟店","XC068": "有巢氏高雄楠梓國中加盟店",
-        "XD001": "有巢氏屏東東港加盟店","XD005": "有巢氏屏東和平加盟店","XD006": "有巢氏屏東潮州加盟店",
-        "XD009": "有巢氏屏東枋寮臨海加盟店","XD010": "有巢氏屏東勝利文傳加盟店","XD011": "有巢氏恆春省北加盟店",
-        "XD012": "有巢氏愛國敦化加盟店","XD013": "有巢氏東港中正興東加盟店","XD014": "有巢氏屏東中正SOGO加盟店",
-        "XE002": "有巢氏澎湖馬公加盟店","MF001": "台慶台東傳廣加盟店","MF003": "台慶台東中華東大加盟店",
-        "PC002": "台慶高雄幸福美術加盟店","PC007": "台慶左營龍華富國加盟店","PC022": "台慶高雄自由百序加盟店",
-        "PC023": "台慶高雄重和高鐵加盟店","PC025": "台慶鳳山青年文化加盟店","PC027": "台慶岡山介壽大義加盟店",
-        "PC028": "台慶高雄鼎金鼎力加盟店","PC029": "台慶鳳山光復加盟店","PC030": "台慶高雄一心民權加盟店",
-        "PC031": "台慶高雄博愛忠言加盟店","PC035": "台慶高雄苓雅中山加盟店","PC037": "台慶高雄澄清加盟店",
-        "PC038": "台慶高雄瑞豐華榮加盟店","PC045": "台慶高雄農十六龍德加盟店","PC047": "台慶高科大建工加盟店",
-        "PC051": "台慶高雄岡山站前加盟店","PC052": "台慶高雄R15孟子加盟店","PC054": "台慶高雄仁武大灣國中加盟店",
-        "PC055": "台慶高雄岡山國宅加盟店","PC056": "台慶高雄中正文化加盟店","PC057": "台慶高雄農美加盟店",
-        "PC058": "台慶高雄巨蛋捷運加盟店","PC060": "台慶衛武營南京加盟店","PC061": "台慶高雄博愛明誠加盟店",
-        "PC062": "台慶高雄女中加盟店","PC063": "台慶高雄右昌莒光加盟店","PC066": "台慶大東文藝中心加盟店",
-        "PC067": "台慶亞灣區中華加盟店","PC068": "台慶高雄自由明誠加盟店","PC069": "台慶高雄中正美麗加盟店",
-        "PC070": "台慶高雄陽明國中加盟店","PC070": "台慶岡山河堤公園加盟店","PC072": "台慶鳳山五甲保泰加盟店",
-        "PC073": "台慶高雄R13忠言加盟店","PC074": "台慶高雄正興百駿加盟店","PC075": "台慶高雄武慶三多加盟店",
-        "PC077": "台慶高雄十全十美加盟店","PC078": "台慶高雄霞海榮總加盟店","PC080": "台慶高雄三民大昌加盟店",
-        "PC081": "台慶高雄楠科德民加盟店","PC083": "台慶高雄自由明華加盟店","PC084": "台慶三民義華正忠加盟店",
-        "PC084": "台慶鳳山中山博愛加盟店","PC085": "台慶高雄微笑文自加盟店","PC087": "台慶高雄八德站前加盟店",
-        "PC088": "台慶楠梓國昌國中加盟店","PC091": "台慶高雄農十六捷運加盟店","PC092": "台慶高雄陽明國小加盟店",
-        "PC093": "台慶高雄青年中山加盟店","PC095": "台慶新民國小加盟店","PC096": "台慶高雄博愛巨蛋加盟店",
-        "PC098": "台慶小港宏平金府加盟店","PC099": "台慶高雄東四高美加盟店","PC102": "台慶路竹科學園區加盟店",
-        "PC104": "台慶高雄中華美術加盟店","PC107": "台慶高雄三多林森加盟店","PC108": "台慶高雄美術美學加盟店",
-        "PC110": "台慶高雄臥龍加盟店","PC111": "台慶高雄河堤國小加盟店","PC112": "台慶高雄華夏崇德加盟店",
-        "PC113": "台慶高雄崇德立大加盟店","PC114": "台慶高雄富國明華加盟店","PC115": "台慶高雄河堤裕誠加盟店",
-        "PC116": "台慶左營高鐵福山加盟店","PC118": "台慶鼓山中華自強加盟店","PC119": "台慶高雄巨蛋明華加盟店",
-        "PC120": "台慶高雄裕誠自由加盟店","PC122": "台慶楠梓德賢德惠加盟店","PC126": "台慶高雄六合中山加盟店",
-        "PC127": "台慶高雄五甲鳳南加盟店","PC128": "台慶高雄桂林鳳頂加盟店","PC129": "台慶楠梓高大藍昌加盟店",
-        "PC131": "台慶高雄富民明華加盟店","PC132": "台慶高雄大寮鳳屏加盟店","PC133": "台慶衛武營鳳西加盟店",
-        "PC134": "台慶鼎山家樂福加盟店","PC135": "台慶鳳山五甲凱旋加盟店","PC137": "台慶高雄六合利揚加盟店",
-        "PC139": "台慶鳳山安家天下加盟店","PC140": "台慶高雄楠梓後昌加宏加盟店","PC141": "台慶高雄楠梓樂群加盟店",
-        "PC142": "台慶高雄莊敬國小加盟店","PC144": "台慶高雄華夏南屏加盟店","PC145": "台慶高雄富國至聖加盟店",
-        "PC146": "台慶高雄新都廳加盟店","PC147": "台慶高雄師大三多加盟店","PC148": "台慶左營新光國小加盟店",
-        "PC149": "台慶鳳甲紅毛港加盟店","PC151": "台慶鳳山武慶二聖加盟店","PC153": "台慶高大家樂福加盟店",
-        "PC154": "台慶左營富民至聖加盟店","PC155": "台慶橋頭青埔捷運加盟店","PC156": "台慶高雄R7民權加盟店",
-        "PC157": "台慶高雄孟子新光加盟店","PC158": "台慶高雄二聖民權加盟店","PC159": "台慶北高華夏鑫富加盟店",
-        "PC160": "台慶高雄大樂聯興加盟店","PC161": "台慶高雄自由貴族加盟店","PC164": "台慶楠梓高大藍田加盟店",
-        "PC165": "台慶楠梓科技德賢加盟店","PC168": "台慶北高孟子群鑫加盟店","PC169": "台慶高雄福山鑫富加盟店",
-        "PC170": "台慶高雄中華十全加盟店","PC170": "台慶高雄岡山民治加盟店","PC171": "台慶岡山双鐵中山加盟店",
-        "PC172": "台慶高雄遠百一心加盟店","PC174": "台慶高雄青年中華加盟店","PC176": "台慶高雄華鳳文龍加盟店",
-        "PC178": "台慶高雄高鐵重信加盟店","PC180": "台慶高雄文化四維加盟店","PC181": "台慶小港漢民康莊加盟店",
-        "PC182": "台慶高雄R14立文加盟店","PC184": "台慶高雄大順建國加盟店","PC185": "台慶三民義大大昌加盟店",
-        "PC186": "台慶高雄三井中山加盟店","PC189": "台慶高雄文山青年加盟店","PC190": "台慶高雄中華青海加盟店",
-        "PC191": "台慶高雄崇德文強加盟店","PC192": "台慶左營國中曾子加盟店","PC193": "台慶高雄陽光美術加盟店",
-        "PC196": "台慶鳳山大東公園加盟店","PC199": "台慶農十六譽鼎加盟店","PC200": "台慶高雄正忠義華加盟店",
-        "PD003": "台慶屏東東港光復加盟店","PD006": "台慶屏東中山公園加盟店","PD007": "台慶屏東大學加盟店",
-        "PD008": "台慶屏東驛站加盟店","PD009": "台慶屏東潮州文化加盟店","PD010": "台慶屏東勝利新城加盟店",
-        "PD011": "台慶屏東建國文傳加盟店","PD012": "台慶屏東博愛廣東加盟店","PD017": "台慶屏東自由博愛加盟店",
-        "PD018": "台慶屏東藝術和平加盟店","PD019": "台慶屏東廣東翊翔加盟店","PD020": "台慶屏東內埔南寧加盟店",
-        "PE001": "台慶澎湖馬公成功加盟店","PO015": "台慶屏東台糖加盟店","PO019": "台慶屏東廣東翊翔加盟店",
-        "00000": "經管會專用","00001": "其他"
+        "AE001": "永慶台東傳廣加盟店","DC002": "永慶高雄尖美加盟店","DC010": "永慶高雄明誠加盟店","DC019": "永慶高雄新堀江鴻麗加盟店","DC025": "永慶高雄左營高鐵加盟店","DC029": "永慶高雄中華藝校加盟店","DC032": "永慶高雄美術北三加盟店","DC040": "永慶高雄R14文信加盟店","DC043": "永慶高雄五福加盟店","DC045": "永慶高雄五甲捷運加盟店","DC046": "永慶高雄農十六加盟店","DC051": "永慶高雄巨蛋凱璿加盟店","DC054": "永慶高雄亞灣童心加盟店","DC060": "永慶高雄博愛凱璿加盟店","DC062": "永慶高雄總圖凱璿加盟店","DC066": "永慶農十六凱璿加盟店","DC069": "永慶高雄中山凱璿加盟店","DC078": "永慶楠梓高雄大學加盟店","DC088": "永慶高雄中華明誠加盟店","DC092": "永慶衛武營新富加盟店","DC094": "永慶農十六神農加盟店","DC096": "永慶高雄巨蛋裕誠加盟店","DC100": "永慶高雄富國鴻麗加盟店","DC103": "永慶高雄楠梓土庫加盟店","DC105": "永慶高雄明誠河堤加盟店","DC106": "永慶高雄左營至聖加盟店","DC110": "永慶籬仔內瑞豐加盟店","DC111": "永慶高雄美術鴻麗加盟店","DC114": "永慶高雄楠梓莒光加盟店","DC120": "永慶高雄大順鴻麗加盟店","DC122": "永慶高雄仁武仁雄加盟店","DC125": "永慶高雄文化青年加盟店","DC131": "永慶北高雄家樂福加盟店","DC132": "永慶楠梓德賢德惠加盟店","DC133": "永慶楠梓援中河堤加盟店","DC136": "永慶高雄三多SOGO加盟店","DC138": "永慶高雄楠梓國中加盟店","DC139": "永慶高雄大樂河堤加盟店","DC140": "永慶鳳山文山文衡加盟店","DC141": "永慶楠梓高大藍田加盟店","DC142": "永慶高雄復興青年加盟店","DC143": "永慶高雄陽明覺民加盟店","DC144": "永慶高雄七賢河東加盟店","DC145": "永慶高雄美術明誠加盟店","DC146": "永慶高雄至真博愛加盟店","DC148": "永慶高雄瑞隆鳳甲加盟店","DC150": "永慶鳳山文山建國加盟店","DC151": "永慶高雄五甲中山加盟店","DC152": "永慶仁武八德永仁加盟店","DC154": "永慶高雄左營國中加盟店","DC155": "永慶高雄亞灣漢神加盟店","DC157": "永慶高雄市政總裁加盟店","DC158": "永慶高雄文山帝寶加盟店","DC159": "永慶高雄站前美家加盟店","DC160": "永慶高雄九如陽明加盟店","DC162": "永慶高雄美術南二加盟店","DC163": "永慶高雄十全博愛加盟店","DC164": "永慶新堀江忠孝加盟店","DC165": "永慶高雄岡山站前加盟店","DC167": "永慶高雄博愛同盟加盟店","DC168": "永慶高雄岡山國宅加盟店","DC169": "永慶高雄龍華國中加盟店","DC170": "永慶高雄華夏新莊加盟店","DC172": "永慶五甲家樂福加盟店","DC173": "永慶鳳山新甲新富加盟店","DC174": "永慶高雄一心光華加盟店","DC175": "永慶楠梓中山高中加盟店","DC176": "永慶高雄科大海專加盟店","DC177": "永慶高雄R13忠言加盟店","DC178": "永慶高雄美術美家加盟店","DC179": "永慶高雄巨蛋圓盛加盟店","DC180": "永慶高雄文山澄清加盟店","DC181": "永慶高雄美術願景加盟店","DC183": "永慶高雄大順自由加盟店","DC184": "永慶高雄高鐵美家加盟店","DC185": "永慶高雄三民家商加盟店","DC186": "永慶高雄文山文安加盟店","DC187": "永慶鳳山三民光遠加盟店","DC188": "永慶高雄美術禾沐加盟店","DC189": "永慶高雄福德三多加盟店","DC190": "永慶高雄路竹美美加盟店","DC191": "永慶高雄岡山美美加盟店","DC192": "永慶高雄自由盛閎加盟店","DC193": "永慶新楠家樂福加盟店","DC194": "永慶高美館明誠加盟店","DC195": "永慶高雄美術帝門加盟店","DC196": "永慶農十六美家加盟店","DC197": "永慶高雄市府興中加盟店","DC198": "永慶高雄自由新莊加盟店","DC199": "永慶高科大正忠加盟店","DC200": "永慶高雄橋科成功加盟店","DC201": "永慶橋科青埔捷運加盟店","DC202": "永慶高雄鳳南鳳甲加盟店","DC203": "永慶高雄中都十全加盟店","DC204": "永慶高雄高大亞聯加盟店","DC205": "永慶高雄中華青海加盟店","DC206": "永慶高雄陽明澄和加盟店","DC207": "永慶高雄亞灣中華加盟店","DD001": "永慶屏東忠孝加盟店","DD002": "永慶屏東自由加盟店","DD005": "永慶屏東站前加盟店","DD006": "永慶屏東廣東加盟店","DD011": "永慶屏東潮州興隆加盟店","DD012": "永慶屏東縣府加盟店","DD013": "永慶屏東中正文傳加盟店","DE001": "永慶澎湖馬公加盟店","HC001": "永義高雄大順龍華加盟店","HC003": "永義高雄農16至聖加盟店","HC004": "永義農十六明華加盟店","HC005": "永義高雄五甲捷運加盟店","HC006": "永義高雄高鐵重愛加盟店","HC007": "永義高雄巨蛋新莊加盟店","HC009": "永義高雄巨蛋明華加盟店","HC010": "永義高雄八德站前加盟店","HC011": "永義高雄富國龍華加盟店","HC012": "永義高雄明誠自由加盟店","HC013": "永義北高楠梓泰揚加盟店","HC014": "永義高雄美術麗鼎加盟店","HC015": "永義楠梓後昌新路加盟店","HC016": "永義農十六大千加盟店","HC017": "永義高雄瑞隆鳳甲加盟店","HC018": "永義高雄高鐵自由加盟店","HC019": "永義高雄十全美都加盟店","HC020": "永義高雄同盟自由加盟店","HC021": "永義高雄楠梓站前加盟店","HC022": "永義高雄楠梓國中加盟店","HC023": "永義楠梓高大藍田加盟店","HC024": "永義楠梓高大展昕加盟店","HC026": "永義高雄巨蛋文信加盟店","HC027": "永義高雄博愛孟子加盟店","HC028": "永義高雄美術擁樂加盟店","HC029": "永義農十六裕國加盟店","HC030": "永義前鎮廣西民權加盟店","HC031": "永義高雄大樂明誠加盟店","HC032": "永義高雄岡山文化加盟店","HC033": "永義三民大昌覺民加盟店","HC034": "永義高雄自由碧發加盟店","HC035": "永義高雄裕誠自由加盟店","HC037": "永義高雄大樂河堤加盟店","HC038": "永義高雄樹禾美都加盟店","HC039": "永義高雄鳳山站前光復加盟店","HC040": "永義楠梓土庫清豐加盟店","HC041": "永義左營龍華至聖加盟店","HC042": "永義漢神巨蛋至真加盟店","HC043": "永義亞灣正勤成功加盟店","HC044": "永義楠梓益群藍田加盟店","HC045": "永義左營重信華夏加盟店","HC046": "永義農十六明倫加盟店","HC047": "永義高雄光華四維加盟店","HC048": "永義高雄大同中山加盟店","HC050": "永義岡山RK1中山加盟店","HC051": "永義三多捷運一心加盟店","HC052": "永義高雄美術龍水加盟店","HC054": "永義楠梓右昌德民加盟店","HC055": "永義高雄三多民權加盟店","HC056": "永義高雄孟子自由加盟店","HC058": "永義高雄明華自由加盟店","HC059": "永義楠梓藍田大學加盟店","HC061": "永義左營大中文川加盟店","HC062": "永義高雄師大和平加盟店","HC065": "永義高雄覺民正忠加盟店","HC066": "永義楠梓莒光軍校加盟店","HC067": "永義高雄民生威欣加盟店","HC068": "永義高雄大順麗鼎加盟店","HC072": "永義鳳山文化岠鋐加盟店","HC073": "永義橋科青埔筌加盟店","HC074": "永義高雄義享天地加盟店","HC075": "永義楠梓仁大興楠加盟店","HC076": "永義北高楠梓鈗鼎加盟店","HC078": "永義高雄裕誠富民加盟店","HC079": "永義龍華國小昕鎵加盟店","HC082": "永義高雄大順龍德加盟店","HD001": "永義屏東崇蘭文傳加盟店","HD002": "永義潮州齊立新加盟店","HD003": "永義屏東民生民和加盟店","HD004": "永義屏東大連千禧加盟店","HD005": "永義屏東縣府自由加盟店","UF002": "有巢氏台東傳廣加盟店","UF003": "有巢氏台東新生南京加盟店","XC007": "有巢氏高醫十全加盟店","XC030": "有巢氏高雄美術之星加盟店","XC034": "有巢氏高雄裕誠河堤加盟店","XC043": "有巢氏永豐瑞隆加盟店","XC051": "有巢氏高雄陽明文山加盟店","XC052": "有巢氏左營福山重愛加盟店","XC055": "有巢氏鼎山家樂福加盟店","XC057": "有巢氏左營重和自由加盟店","XC059": "有巢氏高雄大順鼎山加盟店","XC060": "有巢氏高雄高鐵豐盛加盟店","XC062": "有巢氏高雄七賢中山加盟店","XC063": "有巢氏高雄博愛曾子加盟店","XC064": "有巢氏三民正忠綋杺加盟店","XC066": "有巢氏高雄大學援中加盟店","XC067": "有巢氏高雄岡山國宅加盟店","XC068": "有巢氏高雄楠梓國中加盟店","XD001": "有巢氏屏東東港加盟店","XD005": "有巢氏屏東和平加盟店","XD006": "有巢氏屏東潮州加盟店","XD009": "有巢氏屏東枋寮臨海加盟店","XD010": "有巢氏屏東勝利文傳加盟店","XD011": "有巢氏恆春省北加盟店","XD012": "有巢氏愛國敦化加盟店","XD013": "有巢氏東港中正興東加盟店","XD014": "有巢氏屏東中正SOGO加盟店","XE002": "有巢氏澎湖馬公加盟店","MF001": "台慶台東傳廣加盟店","MF003": "台慶台東中華東大加盟店","PC002": "台慶高雄幸福美術加盟店","PC007": "台慶左營龍華富國加盟店","PC022": "台慶高雄自由百序加盟店","PC023": "台慶高雄重和高鐵加盟店","PC025": "台慶鳳山青年文化加盟店","PC027": "台慶岡山介壽大義加盟店","PC028": "台慶高雄鼎金鼎力加盟店","PC029": "台慶鳳山光復加盟店","PC030": "台慶高雄一心民權加盟店","PC031": "台慶高雄博愛忠言加盟店","PC035": "台慶高雄苓雅中山加盟店","PC037": "台慶高雄澄清加盟店","PC038": "台慶高雄瑞豐華榮加盟店","PC045": "台慶高雄農十六龍德加盟店","PC047": "台慶高科大建工加盟店","PC051": "台慶高雄岡山站前加盟店","PC052": "台慶高雄R15孟子加盟店","PC054": "台慶高雄仁武大灣國中加盟店","PC055": "台慶高雄岡山國宅加盟店","PC056": "台慶高雄中正文化加盟店","PC057": "台慶高雄農美加盟店","PC058": "台慶高雄巨蛋捷運加盟店","PC060": "台慶衛武營南京加盟店","PC061": "台慶高雄博愛明誠加盟店","PC062": "台慶高雄女中加盟店","PC063": "台慶高雄右昌莒光加盟店","PC066": "台慶大東文藝中心加盟店","PC067": "台慶亞灣區中華加盟店","PC068": "台慶高雄自由明誠加盟店","PC069": "台慶高雄中正美麗加盟店","PC070": "台慶高雄陽明國中加盟店","PC070": "台慶岡山河堤公園加盟店","PC072": "台慶鳳山五甲保泰加盟店","PC073": "台慶高雄R13忠言加盟店","PC074": "台慶高雄正興百駿加盟店","PC075": "台慶高雄武慶三多加盟店","PC077": "台慶高雄十全十美加盟店","PC078": "台慶高雄霞海榮總加盟店","PC080": "台慶高雄三民大昌加盟店","PC081": "台慶高雄楠科德民加盟店","PC083": "台慶高雄自由明華加盟店","PC084": "台慶三民義華正忠加盟店","PC084": "台慶鳳山中山博愛加盟店","PC085": "台慶高雄微笑文自加盟店","PC087": "台慶高雄八德站前加盟店","PC088": "台慶楠梓國昌國中加盟店","PC091": "台慶高雄農十六捷運加盟店","PC092": "台慶高雄陽明國小加盟店","PC093": "台慶高雄青年中山加盟店","PC095": "台慶新民國小加盟店","PC096": "台慶高雄博愛巨蛋加盟店","PC098": "台慶小港宏平金府加盟店","PC099": "台慶高雄東四高美加盟店","PC102": "台慶路竹科學園區加盟店","PC104": "台慶高雄中華美術加盟店","PC107": "台慶高雄三多林森加盟店","PC108": "台慶高雄美術美學加盟店","PC110": "台慶高雄臥龍加盟店","PC111": "台慶高雄河堤國小加盟店","PC112": "台慶高雄華夏崇德加盟店","PC113": "台慶高雄崇德立大加盟店","PC114": "台慶高雄富國明華加盟店","PC115": "台慶高雄河堤裕誠加盟店","PC116": "台慶左營高鐵福山加盟店","PC118": "台慶鼓山中華自強加盟店","PC119": "台慶高雄巨蛋明華加盟店","PC120": "台慶高雄裕誠自由加盟店","PC122": "台慶楠梓德賢德惠加盟店","PC126": "台慶高雄六合中山加盟店","PC127": "台慶高雄五甲鳳南加盟店","PC128": "台慶高雄桂林鳳頂加盟店","PC129": "台慶楠梓高大藍昌加盟店","PC131": "台慶高雄富民明華加盟店","PC132": "台慶高雄大寮鳳屏加盟店","PC133": "台慶衛武營鳳西加盟店","PC134": "台慶鼎山家樂福加盟店","PC135": "台慶鳳山五甲凱旋加盟店","PC137": "台慶高雄六合利揚加盟店","PC139": "台慶鳳山安家天下加盟店","PC140": "台慶高雄楠梓後昌加宏加盟店","PC141": "台慶高雄楠梓樂群加盟店","PC142": "台慶高雄莊敬國小加盟店","PC144": "台慶高雄華夏南屏加盟店","PC145": "台慶高雄富國至聖加盟店","PC146": "台慶高雄新都廳加盟店","PC147": "台慶高雄師大三多加盟店","PC148": "台慶左營新光國小加盟店","PC149": "台慶鳳甲紅毛港加盟店","PC151": "台慶鳳山武慶二聖加盟店","PC153": "台慶高大家樂福加盟店","PC154": "台慶左營富民至聖加盟店","PC155": "台慶橋頭青埔捷運加盟店","PC156": "台慶高雄R7民權加盟店","PC157": "台慶高雄孟子新光加盟店","PC158": "台慶高雄二聖民權加盟店","PC159": "台慶北高華夏鑫富加盟店","PC160": "台慶高雄大樂聯興加盟店","PC161": "台慶高雄自由貴族加盟店","PC164": "台慶楠梓高大藍田加盟店","PC165": "台慶楠梓科技德賢加盟店","PC168": "台慶北高孟子群鑫加盟店","PC169": "台慶高雄福山鑫富加盟店","PC170": "台慶高雄中華十全加盟店","PC170": "台慶高雄岡山民治加盟店","PC171": "台慶岡山双鐵中山加盟店","PC172": "台慶高雄遠百一心加盟店","PC174": "台慶高雄青年中華加盟店","PC176": "台慶高雄華鳳文龍加盟店","PC178": "台慶高雄高鐵重信加盟店","PC180": "台慶高雄文化四維加盟店","PC181": "台慶小港漢民康莊加盟店","PC182": "台慶高雄R14立文加盟店","PC184": "台慶高雄大順建國加盟店","PC185": "台慶三民義大大昌加盟店","PC186": "台慶高雄三井中山加盟店","PC189": "台慶高雄文山青年加盟店","PC190": "台慶高雄中華青海加盟店","PC191": "台慶高雄崇德文強加盟店","PC192": "台慶左營國中曾子加盟店","PC193": "台慶高雄陽光美術加盟店","PC196": "台慶鳳山大東公園加盟店","PC199": "台慶農十六譽鼎加盟店","PC200": "台慶高雄正忠義華加盟店","PD003": "台慶屏東東港光復加盟店","PD006": "台慶屏東中山公園加盟店","PD007": "台慶屏東大學加盟店","PD008": "台慶屏東驛站加盟店","PD009": "台慶屏東潮州文化加盟店","PD010": "台慶屏東勝利新城加盟店","PD011": "台慶屏東建國文傳加盟店","PD012": "台慶屏東博愛廣東加盟店","PD017": "台慶屏東自由博愛加盟店","PD018": "台慶屏東藝術和平加盟店","PD019": "台慶屏東廣東翊翔加盟店","PD020": "台慶屏東內埔南寧加盟店","PE001": "台慶澎湖馬公成功加盟店","PO015": "台慶屏東台糖加盟店","PO019": "台慶屏東廣東翊翔加盟店"
     };
 
     const products = [
         { id: 1, vendor: "漢來大飯店", title: "漢來情月．典藏禮盒", price: 1880, img: "images/漢來01.jpg"},
         { id: 2, vendor: "漢來大飯店", title: "漢來情月．風雅禮盒", price: 1380, img: "images/漢來02.jpg" },
-        { id: 3, vendor: "高雄萬豪酒店", title: "豪月廣式禮盒", price: 1760, img: "images/萬豪01.jpg" },
-        { id: 4, vendor: "高雄萬豪酒店", title: "豪月廣式禮盒02", price: 1800, img: "images/萬豪01.jpg" }
+        { id: 3, vendor: "高雄萬豪酒店", title: "豪月廣式禮盒", price: 1760, img: "images/萬豪01.jpg" }
     ];
 
     let currentUser = null;
     let cart = {};
 
-    function getRegisteredStores() {
-        return JSON.parse(localStorage.getItem('mooncake_registered_stores')) || {};
+    // --- 改為從 Supabase 取得資料 ---
+    async function getRegisteredStores() {
+        const { data, error } = await _supabase.from('stores').select('*');
+        if (error) {
+            console.error("獲取店家資料失敗:", error);
+            return {};
+        }
+        const storeObj = {};
+        (data || []).forEach(s => {
+            storeObj[s.storeId] = s;
+        });
+        return storeObj;
     }
 
-    function saveRegisteredStores(stores) {
-        localStorage.setItem('mooncake_registered_stores', JSON.stringify(stores));
-    }
-
-    function getAllOrders() {
-        return JSON.parse(localStorage.getItem('mooncake_all_orders')) || [];
-    }
-
-    function saveAllOrders(orders) {
-        localStorage.setItem('mooncake_all_orders', JSON.stringify(orders));
+    async function getAllOrders() {
+        const { data, error } = await _supabase.from('orders').select('*');
+        if (error) {
+            console.error("獲取訂單資料失敗:", error);
+            return [];
+        }
+        return data || [];
     }
 
     function showPage(pageId) {
@@ -722,8 +618,7 @@
         document.getElementById('reg-store-name').value = storeMaster[id] || "查無此店代號";
     }
 
-    // 需求 6：註冊時記錄註冊人姓名與電話
-    function handleRegister() {
+    async function handleRegister() {
         const id = document.getElementById('reg-store-id').value.trim().toUpperCase();
         const name = storeMaster[id];
         const pass = document.getElementById('reg-password').value;
@@ -735,7 +630,7 @@
         if (!registrantName) { alert("請輸入註冊人姓名！"); return; }
         if (!registrantPhone) { alert("請輸入註冊人電話！"); return; }
 
-        const registeredStores = getRegisteredStores();
+        const registeredStores = await getRegisteredStores();
 
         if (registeredStores[id]) { 
             alert("該店代號已經註冊過，請直接登入！"); 
@@ -744,26 +639,31 @@
             return; 
         }
 
-        registeredStores[id] = { 
+        const newStore = { 
             storeId: id, 
             storeName: name, 
             password: pass,
             registrantName: registrantName,
             registrantPhone: registrantPhone
         };
-        saveRegisteredStores(registeredStores);
+
+        const { error } = await _supabase.from('stores').insert([newStore]);
+        if (error) {
+            alert("註冊失敗：" + error.message);
+            return;
+        }
 
         alert("註冊成功！已為您自動登入。");
-        loginSuccess(registeredStores[id]);
+        loginSuccess(newStore);
     }
 
-    function handleLogin() {
+    async function handleLogin() {
         const id = document.getElementById('login-store-id').value.trim().toUpperCase();
         const pass = document.getElementById('login-password').value;
 
         if (!id || !pass) { alert("請輸入店代號與密碼！"); return; }
 
-        const registeredStores = getRegisteredStores();
+        const registeredStores = await getRegisteredStores();
 
         if (!registeredStores[id]) {
             alert("該店代號尚未註冊，請先點選「新店註冊」！");
@@ -865,7 +765,7 @@
         showPage('page3');
     }
 
-    function submitOrder() {
+    async function submitOrder() {
         const name = document.getElementById('buyer-name').value;
         const phone = document.getElementById('buyer-phone').value;
         const address = document.getElementById('buyer-address').value;
@@ -893,9 +793,11 @@
             date: new Date().toLocaleString()
         };
 
-        const allOrders = getAllOrders();
-        allOrders.push(newOrder);
-        saveAllOrders(allOrders);
+        const { error } = await _supabase.from('orders').insert([newOrder]);
+        if (error) {
+            alert("訂單送出失敗：" + error.message);
+            return;
+        }
 
         document.getElementById('order-success-info').innerHTML = `
             <p><strong>訂單編號：</strong>${newOrder.orderId}</p>
@@ -907,7 +809,6 @@
         showPage('page4');
     }
 
-    // 需求 4：繼續訂購時清空數量與表單
     function resetAndContinueShopping() {
         cart = {};
         document.getElementById('buyer-name').value = '';
@@ -935,15 +836,15 @@
         showPage('page-history');
     }
 
-    function renderOrdersList(keyword = "") {
-        const allOrders = getAllOrders();
+    async function renderOrdersList(keyword = "") {
+        const allOrders = await getAllOrders();
         let filterOrders = [];
 
         if (currentUser.isAdmin) {
             const kw = keyword.toLowerCase();
             filterOrders = allOrders.filter(o => 
-                o.storeId.toLowerCase().includes(kw) || 
-                o.orderId.toLowerCase().includes(kw)
+                (o.storeId && o.storeId.toLowerCase().includes(kw)) || 
+                (o.orderId && o.orderId.toLowerCase().includes(kw))
             );
         } else {
             filterOrders = allOrders.filter(o => o.storeId === currentUser.storeId);
@@ -954,7 +855,7 @@
             historyHtml = `<p style="color:var(--text-muted); padding:20px 0;">${keyword ? '查無符合條件的訂單' : '目前尚無訂單紀錄'}</p>`;
         } else {
             filterOrders.slice().reverse().forEach(o => {
-                let itemsDetail = o.items.map(i => `${i.title} x ${i.qty}`).join('、');
+                let itemsDetail = Array.isArray(o.items) ? o.items.map(i => `${i.title} x ${i.qty}`).join('、') : '';
                 
                 let adminActionBtns = "";
                 if (currentUser.isAdmin) {
@@ -1000,9 +901,8 @@
         renderOrdersList();
     }
 
-    // 需求 1：管理員編輯訂單 (可修改品項)
-    function openEditModal(orderId) {
-        const allOrders = getAllOrders();
+    async function openEditModal(orderId) {
+        const allOrders = await getAllOrders();
         const order = allOrders.find(o => o.orderId === orderId);
         if (!order) return;
 
@@ -1013,7 +913,7 @@
 
         let itemsHtml = "";
         products.forEach(p => {
-            const existingItem = order.items.find(i => i.title === p.title || i.id === p.id);
+            const existingItem = Array.isArray(order.items) ? order.items.find(i => i.title === p.title || i.id === p.id) : null;
             const qty = existingItem ? existingItem.qty : 0;
             itemsHtml += `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #f0f0f0; padding-bottom:8px;">
@@ -1036,12 +936,9 @@
         document.getElementById('editOrderModal').style.display = 'none';
     }
 
-    function saveOrderEdit() {
+    async function saveOrderEdit() {
         const orderId = document.getElementById('edit-order-id').value;
-        const allOrders = getAllOrders();
-        const index = allOrders.findIndex(o => o.orderId === orderId);
-        if (index === -1) return;
-
+        
         let updatedItems = [];
         let newTotal = 0;
 
@@ -1059,34 +956,42 @@
             }
         });
 
-        allOrders[index].buyerName = document.getElementById('edit-buyer-name').value;
-        allOrders[index].buyerPhone = document.getElementById('edit-buyer-phone').value;
-        allOrders[index].buyerAddress = document.getElementById('edit-buyer-address').value;
-        allOrders[index].items = updatedItems;
-        allOrders[index].totalAmount = newTotal;
+        const updatedData = {
+            buyerName: document.getElementById('edit-buyer-name').value,
+            buyerPhone: document.getElementById('edit-buyer-phone').value,
+            buyerAddress: document.getElementById('edit-buyer-address').value,
+            items: updatedItems,
+            totalAmount: newTotal
+        };
 
-        saveAllOrders(allOrders);
+        const { error } = await _supabase.from('orders').update(updatedData).eq('orderId', orderId);
+        if (error) {
+            alert("更新失敗：" + error.message);
+            return;
+        }
+
         closeEditModal();
         renderOrdersList(document.getElementById('search-keyword').value.trim());
         alert("訂單已更新完成！");
     }
 
-    function deleteOrder(orderId) {
+    async function deleteOrder(orderId) {
         if (!confirm(`確定要刪除訂單 ${orderId} 嗎？`)) return;
-        let allOrders = getAllOrders();
-        allOrders = allOrders.filter(o => o.orderId !== orderId);
-        saveAllOrders(allOrders);
+        const { error } = await _supabase.from('orders').delete().eq('orderId', orderId);
+        if (error) {
+            alert("刪除失敗：" + error.message);
+            return;
+        }
         renderOrdersList(document.getElementById('search-keyword').value.trim());
     }
 
-    // 需求 7 & 3：密碼查詢頁面顯示姓名電話與刪除帳號重置
     function showPasswordManage() {
         renderPasswordList();
         showPage('page-passwords');
     }
 
-    function renderPasswordList() {
-        const stores = getRegisteredStores();
+    async function renderPasswordList() {
+        const stores = await getRegisteredStores();
         const kw = document.getElementById('search-store-pwd').value.trim().toUpperCase();
         
         let html = "<table><tr><th>店代號</th><th>店名稱</th><th>密碼</th><th>註冊人姓名</th><th>註冊人電話</th><th>操作</th></tr>";
@@ -1117,32 +1022,34 @@
         document.getElementById('password-list').innerHTML = html;
     }
 
-    // 需求 3：刪除帳號重置
-    function deleteStoreAccount(storeId) {
+    async function deleteStoreAccount(storeId) {
         if (!confirm(`警告：刪除 ${storeId} 帳號將會重置該店密碼與該店所有訂單！確定刪除？`)) return;
 
         // 1. 刪除註冊帳號
-        const stores = getRegisteredStores();
-        delete stores[storeId];
-        saveRegisteredStores(stores);
+        const { error: err1 } = await _supabase.from('stores').delete().eq('storeId', storeId);
+        if (err1) {
+            alert("刪除帳號失敗：" + err1.message);
+            return;
+        }
 
         // 2. 刪除該店訂單
-        let allOrders = getAllOrders();
-        allOrders = allOrders.filter(o => o.storeId !== storeId);
-        saveAllOrders(allOrders);
+        const { error: err2 } = await _supabase.from('orders').delete().eq('storeId', storeId);
+        if (err2) {
+            alert("刪除相關訂單失敗：" + err2.message);
+            return;
+        }
 
         alert(`已成功刪除 ${storeId} 帳號並重置相關資料。`);
         renderPasswordList();
     }
 
-    // 需求 2：訂購統計功能
     function showStatsPage() {
         renderStats();
         showPage('page-stats');
     }
 
-    function renderStats() {
-        const allOrders = getAllOrders();
+    async function renderStats() {
+        const allOrders = await getAllOrders();
         let totalStats = {};
         let grandTotalAmount = 0;
         let grandTotalQty = 0;
