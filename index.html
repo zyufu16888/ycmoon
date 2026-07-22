@@ -438,15 +438,34 @@
 
 <div class="main-container">
 
+    <style>
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+    </style>
+
     <!-- 第二頁：選購月餅 -->
     <div id="page2" class="page">
         <h3 style="font-weight: 600; margin-bottom: 20px;">選擇訂購月餅款式</h3>
         <div id="product-list"></div>
-        <div style="position: sticky; bottom: 20px; background: #ffffff; padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+        <div style="position: sticky; bottom: 20px; background: #ffffff;
+            padding: 20px; border: 1px solid var(--border-color);
+            border-radius: 12px; display: flex;
+            justify-content: space-between; align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
             <div>
-                <span style="color: var(--text-muted); font-size: 0.9rem;">總數量：<strong id="cart-qty" style="color: var(--text-main);">0</strong> 盒</span>
+                <span style="color: var(--text-muted); font-size: 0.9rem;
+                    ">總數量：<strong id="cart-qty" style="color: var(--text-main);
+                              ">0</strong> 盒</span>
                 <span style="margin: 0 10px; color: var(--border-color);">|</span>
-                <span style="color: var(--text-muted); font-size: 0.9rem;">總金額：<strong style="color: var(--text-main); font-size: 1.1rem;">$<span id="cart-total">0</span></strong></span>
+                <span style="color: var(--text-muted); font-size: 0.9rem;
+                    ">總金額：<strong style="color: var(--text-main); font-size: 1.1rem;
+                              ">$<span id="cart-total">0</span></strong></span>
             </div>
             <button class="btn" onclick="goToCheckout()">下一步：填寫寄送資訊</button>
         </div>
