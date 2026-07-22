@@ -806,7 +806,17 @@
                 </div>
                 <div style="display:flex; align-items:center;">
                     <button class="btn btn-secondary" style="padding:6px 12px;" onclick="updateQty(${p.id}, -1)">-</button>
-                    <span id="qty-${p.id}" style="margin:0 12px; font-weight:600;">${cart[p.id] || 0}</span>
+                    <input 
+                    type="number"
+                    id="qty-${p.id}"
+                    value="${cart[p.id] || 0}"
+                    min="0"
+                    max="9999"
+                    oninput="handleDirectInput(${p.id}, this.value)"
+                    onchange="handleDirectInput(${p.id}, this.value)"
+                    style="width: 50px; text-align: center; margin: 0 6px; padding: 4px; border: 1px solid var(--border-color, #ccc); border-radius: 6px; font-weight: 600; font-size: 1rem;"
+                />
+                
                     <button class="btn btn-secondary" style="padding:6px 12px;" onclick="updateQty(${p.id}, 1)">+</button>
                 </div>
             </div>
@@ -814,10 +824,22 @@
         updateTotal();
     }
 
+    function handleDirectInput(productId, val) {
+    let newQty = parseInt(val);
+    if (isNaN(newQty) || newQty < 0) {
+        newQty = 0;
+    }
+    cart[productId] = newQty;
+    updateTotal();
+    }
+
     function updateQty(id, change) {
         cart[id] = (cart[id] || 0) + change;
         if (cart[id] < 0) cart[id] = 0;
-        document.getElementById(`qty-${id}`).innerText = cart[id];
+        const inputEl = document.getElementById(`qty-${id}`);
+        if (inputEl) {
+        inputEl.value = cart[id];
+    }
         updateTotal();
     }
 
